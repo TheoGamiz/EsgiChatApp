@@ -1,5 +1,5 @@
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
-import 'package:esgi_chat_app/blocs/simple_bloc_observer.dart';
+//import 'package:esgi_chat_app/blocs/simple_bloc_observer.dart';
 import 'package:esgi_chat_app/repository/user_repository.dart';
 import 'package:esgi_chat_app/screens/home/home_screen.dart';
 import 'package:esgi_chat_app/screens/login/login_screen.dart';
@@ -13,7 +13,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  Bloc.observer = SimpleBlocObserver();
+  //Bloc.observer = SimpleBlocObserver();
   final UserRepository userRepository = UserRepository();
   runApp(
     BlocProvider(
