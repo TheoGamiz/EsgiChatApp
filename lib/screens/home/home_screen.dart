@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:esgi_chat_app/blocs/auth_bloc/bloc/auth_bloc.dart';
-import 'package:esgi_chat_app/blocs/auth_bloc/bloc/auth_event.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../blocs/auth_bloc/bloc/auth_state.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
 class HomeScreen extends StatelessWidget {
   final FirebaseUser user;
