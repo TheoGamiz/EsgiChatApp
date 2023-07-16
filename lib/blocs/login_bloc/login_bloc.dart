@@ -1,8 +1,8 @@
 
-import 'package:firebaseauthproject/blocs/login_bloc/login_event.dart';
-import 'package:firebaseauthproject/blocs/login_bloc/login_state.dart';
-import 'package:firebaseauthproject/repositories/user_repository.dart';
-import 'package:firebaseauthproject/utils/validators.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_event.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_state.dart';
+import 'package:esgi_chat_app/repository/user_repository.dart';
+import 'package:esgi_chat_app/utils/validators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {

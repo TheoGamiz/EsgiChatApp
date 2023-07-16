@@ -1,8 +1,8 @@
 
-import 'package:firebaseauthproject/blocs/register_bloc/register_event.dart';
-import 'package:firebaseauthproject/blocs/register_bloc/register_state.dart';
-import 'package:firebaseauthproject/repositories/user_repository.dart';
-import 'package:firebaseauthproject/utils/validators.dart';
+import 'package:esgi_chat_app/blocs/register_bloc/register_event.dart';
+import 'package:esgi_chat_app/blocs/register_bloc/register_state.dart';
+import 'package:esgi_chat_app/repository/user_repository.dart';
+import 'package:esgi_chat_app/utils/validators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 abstract class AuthenticationState extends Equatable {
   AuthenticationState();
 
@@ -11,7 +12,7 @@ abstract class AuthenticationState extends Equatable {
 class AuthenticationInitial extends AuthenticationState {}
 
 class AuthenticationSuccess extends AuthenticationState {
-  final FirebaseUser firebaseUser;
+  final User firebaseUser;
 
   AuthenticationSuccess(this.firebaseUser);
 

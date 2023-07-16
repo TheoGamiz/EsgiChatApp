@@ -1,11 +1,11 @@
-import 'package:firebaseauthproject/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:firebaseauthproject/blocs/authentication_bloc/authentication_event.dart';
-import 'package:firebaseauthproject/blocs/login_bloc/login_bloc.dart';
-import 'package:firebaseauthproject/blocs/login_bloc/login_event.dart';
-import 'package:firebaseauthproject/blocs/login_bloc/login_state.dart';
-import 'package:firebaseauthproject/repositories/user_repository.dart';
-import 'package:firebaseauthproject/screens/register/register_screen.dart';
-import 'package:firebaseauthproject/widgets/gradient_button.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_bloc.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_event.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_state.dart';
+import 'package:esgi_chat_app/repository/user_repository.dart';
+import 'package:esgi_chat_app/screens/register/register_screen.dart';
+import 'package:esgi_chat_app/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -46,7 +46,7 @@ class _LoginFormState extends State<LoginForm> {
     return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state.isFailure) {
-          Scaffold.of(context)
+          ScaffoldMessenger.of(context)
             ..removeCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
@@ -63,7 +63,7 @@ class _LoginFormState extends State<LoginForm> {
         }
 
         if (state.isSubmitting) {
-          Scaffold.of(context)
+          ScaffoldMessenger.of(context)
             ..removeCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
@@ -101,7 +101,7 @@ class _LoginFormState extends State<LoginForm> {
                       labelText: "Email",
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    autovalidate: true,
+                    //autovalidate: true,
                     autocorrect: false,
                     validator: (_) {
                       return !state.isEmailValid ? 'Invalid Email' : null;
@@ -114,7 +114,7 @@ class _LoginFormState extends State<LoginForm> {
                       labelText: "Password",
                     ),
                     obscureText: true,
-                    autovalidate: true,
+                    //autovalidate: true,
                     autocorrect: false,
                     validator: (_) {
                       return !state.isPasswordValid ? 'Invalid Password' : null;

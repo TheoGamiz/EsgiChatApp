@@ -3,13 +3,14 @@ import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
 class HomeScreen extends StatelessWidget {
-  final FirebaseUser user;
+  final User user;
 
-  const HomeScreen({ Key? key, required this.user}) : super(key: key);
+  const HomeScreen({ Key key,  this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

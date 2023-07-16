@@ -1,7 +1,7 @@
-import 'package:firebaseauthproject/blocs/login_bloc/login_bloc.dart';
-import 'package:firebaseauthproject/repositories/user_repository.dart';
-import 'package:firebaseauthproject/screens/login/login_form.dart';
-import 'package:firebaseauthproject/widgets/curved_widget.dart';
+import 'package:esgi_chat_app/blocs/login_bloc/login_bloc.dart';
+import 'package:esgi_chat_app/repository/user_repository.dart';
+import 'package:esgi_chat_app/screens/login/login_form.dart';
+import 'package:esgi_chat_app/widgets/curved_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

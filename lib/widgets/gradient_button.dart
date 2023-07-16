@@ -8,7 +8,7 @@ class GradientButton extends StatelessWidget {
   final Icon icon;
 
   const GradientButton(
-      {Key? key, required this.width, required this.height, required this.onPressed, required this.text, required this.icon})
+      {Key key, this.width, this.height, this.onPressed, this.text, this.icon})
       : super(key: key);
 
   @override
