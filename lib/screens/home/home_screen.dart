@@ -4,7 +4,6 @@ import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
 class HomeScreen extends StatelessWidget {
