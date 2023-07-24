@@ -1,14 +1,16 @@
-import 'package:esgi_chat_app/blocs/register_bloc/register_bloc.dart';
-import 'package:esgi_chat_app/repository/user_repository.dart';
-import 'package:esgi_chat_app/screens/register/register_form.dart';
-import 'package:esgi_chat_app/widgets/curved_widget.dart';
+import '../bloc/login_bloc.dart';
+import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
+import './login_form.dart';
+import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class RegisterScreen extends StatelessWidget {
+import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
+
+class LoginScreen extends StatelessWidget {
   final UserRepository _userRepository;
 
-  const RegisterScreen({Key key, UserRepository userRepository})
+  const LoginScreen({Key key, UserRepository userRepository})
       : _userRepository = userRepository,
         super(key: key);
 
@@ -19,21 +21,17 @@ class RegisterScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        iconTheme: IconThemeData(
-          color: Color(0xff6a515e),
-        ),
       ),
-      body: BlocProvider<RegisterBloc>(
-        create: (context) => RegisterBloc(userRepository: _userRepository),
+      body: BlocProvider<LoginBloc>(
+        create: (context) => LoginBloc(userRepository: _userRepository),
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xfff2cbd0), Color(0xfff4ced9)],
-            ),
-          ),
+              gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xfff2cbd0), Color(0xfff4ced9)],
+          )),
           child: SingleChildScrollView(
             child: Stack(
               children: <Widget>[
@@ -50,7 +48,7 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Register',
+                      'Login',
                       style: TextStyle(
                         fontSize: 40,
                         color: Color(0xff6a515e),
@@ -60,7 +58,9 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 Container(
                   margin: const EdgeInsets.only(top: 230),
-                  child: RegisterForm(),
+                  child: LoginForm(
+                    userRepository: _userRepository,
+                  ),
                 )
               ],
             ),

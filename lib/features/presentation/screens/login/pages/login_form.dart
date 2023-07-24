@@ -1,41 +1,49 @@
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
-import 'package:esgi_chat_app/blocs/register_bloc/register_bloc.dart';
-import 'package:esgi_chat_app/blocs/register_bloc/register_event.dart';
-import 'package:esgi_chat_app/blocs/register_bloc/register_state.dart';
-import 'package:esgi_chat_app/widgets/gradient_button.dart';
+import '../bloc/login_bloc.dart';
+import '../bloc/login_event.dart';
+import '../bloc/login_state.dart';
+import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
+import 'package:esgi_chat_app/features/presentation/screens/register/pages/register_screen.dart';
+import 'package:esgi_chat_app/features/presentation/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class RegisterForm extends StatefulWidget {
+class LoginForm extends StatefulWidget {
+  final UserRepository _userRepository;
+
+  const LoginForm({Key key, UserRepository userRepository})
+      : _userRepository = userRepository,
+        super(key: key);
+
   @override
   _LoginFormState createState() => _LoginFormState();
 }
 
-class _LoginFormState extends State<RegisterForm> {
+class _LoginFormState extends State<LoginForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool get isPopulated =>
       _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty;
 
-  bool isButtonEnabled(RegisterState state) {
+  bool isButtonEnabled(LoginState state) {
     return state.isFormValid && isPopulated && !state.isSubmitting;
   }
 
-  RegisterBloc _registerBloc;
+  LoginBloc _loginBloc;
 
   @override
   void initState() {
     super.initState();
-    _registerBloc = BlocProvider.of<RegisterBloc>(context);
+    _loginBloc = BlocProvider.of<LoginBloc>(context);
     _emailController.addListener(_onEmailChange);
     _passwordController.addListener(_onPasswordChange);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RegisterBloc, RegisterState>(
+    return BlocListener<LoginBloc, LoginState>(
       listener: (context, state) {
         if (state.isFailure) {
           ScaffoldMessenger.of(context)
@@ -45,7 +53,7 @@ class _LoginFormState extends State<RegisterForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Register Failure'),
+                    Text('Login Failure'),
                     Icon(Icons.error),
                   ],
                 ),
@@ -62,7 +70,7 @@ class _LoginFormState extends State<RegisterForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Registering...'),
+                    Text('Logging In...'),
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
@@ -77,10 +85,9 @@ class _LoginFormState extends State<RegisterForm> {
           BlocProvider.of<AuthenticationBloc>(context).add(
             AuthenticationLoggedIn(),
           );
-          Navigator.pop(context);
         }
       },
-      child: BlocBuilder<RegisterBloc, RegisterState>(
+      child: BlocBuilder<LoginBloc, LoginState>(
         builder: (context, state) {
           return Padding(
             padding: const EdgeInsets.all(20.0),
@@ -114,7 +121,7 @@ class _LoginFormState extends State<RegisterForm> {
                     },
                   ),
                   SizedBox(
-                    height: 30,
+                    height: 10,
                   ),
                   GradientButton(
                     width: 150,
@@ -125,7 +132,7 @@ class _LoginFormState extends State<RegisterForm> {
                       }
                     },
                     text: Text(
-                      'Register',
+                      'LogIn',
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -138,6 +145,27 @@ class _LoginFormState extends State<RegisterForm> {
                   SizedBox(
                     height: 10,
                   ),
+                  GradientButton(
+                    width: 150,
+                    height: 45,
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) {
+                        return RegisterScreen(
+                          userRepository: widget._userRepository,
+                        );
+                      }));
+                    },
+                    text: Text(
+                      'Register',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -147,17 +175,23 @@ class _LoginFormState extends State<RegisterForm> {
     );
   }
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _onEmailChange() {
-    _registerBloc.add(RegisterEmailChanged(email: _emailController.text));
+    _loginBloc.add(LoginEmailChange(email: _emailController.text));
   }
 
   void _onPasswordChange() {
-    _registerBloc
-        .add(RegisterPasswordChanged(password: _passwordController.text));
+    _loginBloc.add(LoginPasswordChanged(password: _passwordController.text));
   }
 
   void _onFormSubmitted() {
-    _registerBloc.add(RegisterSubmitted(
+    _loginBloc.add(LoginWithCredentialsPressed(
         email: _emailController.text, password: _passwordController.text));
   }
 }
