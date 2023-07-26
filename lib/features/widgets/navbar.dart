@@ -1,3 +1,5 @@
+import 'package:esgi_chat_app/features/fiendlist/screen/friendlist_screen.dart';
+import 'package:esgi_chat_app/features/profile/screen/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +29,9 @@ class _NavBarState extends State<NavBar> {
     super.initState();
     _widgetOptions = <Widget>[
       HomeScreen(user: widget.user),
-      Text(
-        'Profile',
-        style: optionStyle,
-      ),
+      FriendList(),
+      Profile(user: widget.user),
+
     ];
   }
 
@@ -68,6 +69,10 @@ class _NavBarState extends State<NavBar> {
                 GButton(
                   icon: LineIcons.home,
                   text: 'Home',
+                ),
+                GButton(
+                  icon: LineIcons.userFriends,
+                  text: 'Amis',
                 ),
                 GButton(
                   icon: LineIcons.user,
