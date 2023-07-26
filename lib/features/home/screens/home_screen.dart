@@ -70,16 +70,7 @@ class HomeScreen extends StatelessWidget {
                   itemCount: friends.length,
                   itemBuilder: (context, index) {
                     final friendUid = friends[index] as String;
-
-                    // Fetch friend details from Firestore based on the friendUid
-                    // if required, and display friend information in the list.
-
-                    return Card(
-                      child: ListTile(
-                        title: Text(friendUid),
-                        // Display any other friend information here, such as name, profile picture, etc.
-                      ),
-                    );
+                    return FriendCard(friendUid: friendUid);
                   },
                 );
               },
@@ -151,4 +142,61 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+
 }
+
+class FriendCard extends StatelessWidget {
+  final String friendUid;
+
+  FriendCard({required this.friendUid}) : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future:
+          FirebaseFirestore.instance.collection('users').doc(friendUid).get(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Card(
+            child: ListTile(
+              title: Text('Error loading friend'),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Card(
+            child: ListTile(
+              title: Text('Loading...'),
+            ),
+          );
+        }
+
+        final friendDoc = snapshot.data;
+        if (!friendDoc!.exists) {
+          return Card(
+            child: ListTile(
+              title: Text('Friend not found'),
+            ),
+          );
+        }
+
+        final friendEmail = friendDoc['email'] as String;
+        final imageUrl =
+            'https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${friendUid}.png?alt=media';
+
+        return Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(imageUrl),
+              radius: 20, // Adjust the size as needed
+            ),
+            title: Text(friendEmail),
+            // Display any other friend information here, such as name, profile picture, etc.
+          ),
+        );
+      },
+    );
+  }
+}
+

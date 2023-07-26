@@ -33,7 +33,7 @@ class _ProfileState extends State<Profile> {
       final uid = widget.user!
           .uid; // Replace with the actual user ID or any unique identifier. // The desired name for the file in Firebase Storage.
       final firebase_storage.Reference storageRef =
-          firebase_storage.FirebaseStorage.instance.ref('$uid');
+          firebase_storage.FirebaseStorage.instance.ref('$uid.png');
 
       await storageRef.putFile(_selectedImage!);
 
@@ -57,7 +57,7 @@ class _ProfileState extends State<Profile> {
           
                CircleAvatar(
                   radius: 50,
-                  backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}?alt=media&token=${token}"),
+                  backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}.png?alt=media&token=${token}"),
                 ),
           Text(widget.user!.email!),
           Text(widget.user!.uid),
