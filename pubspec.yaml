@@ -71,6 +71,8 @@ dependencies:
   cached_network_image: ^3.2.0
   open_filex: ^4.3.2
   mime: ^1.0.4
+  google_nav_bar: ^5.0.6
+  line_icons: ^2.0.3
 
 dev_dependencies:
   flutter_test:
