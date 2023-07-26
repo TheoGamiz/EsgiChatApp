@@ -123,7 +123,7 @@ class HomeScreen extends StatelessWidget {
                               .collection('users')
                               .doc(friendUid)
                               .update({
-                            'demande': FieldValue.arrayUnion([currentUserId]),
+                            'demandes': FieldValue.arrayUnion([currentUserId]),
                           });
 
                           Navigator.of(context).pop();
@@ -145,34 +145,56 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-void _createOrGetRoomDocument(String userId, String friendUid) async {
-  print("JE CREE UNE ROOM AVANT");
-
+void _createOrGetRoomDocument(String userId, String friendUid, BuildContext context) async {
   try {
-    print("JE CREE UNE ROOM TRY");
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // Générer un nouvel ID pour le document de la room
-    String roomId = firestore.collection('rooms').doc().id;
+    // First, query the rooms collection to find a room that has both userId and friendUid as participants.
+    final QuerySnapshot querySnapshot = await firestore
+        .collection('rooms')
+        .where('participants', arrayContainsAny: [userId, friendUid]).get();
 
-    // Définir les données du document
-    Map<String, dynamic> roomData = {
-      'participants': [userId, friendUid]
-    };
+    if (querySnapshot.docs.isNotEmpty) {
+      // If a room already exists with these participants, use that room.
+      final roomId = querySnapshot.docs.first.id;
+      _navigateToChatScreen(roomId, friendUid, context);
+    } else {
+      // If no room exists, create a new room.
+      String roomId = firestore.collection('rooms').doc().id;
+      Map<String, dynamic> roomData = {
+        'participants': [userId, friendUid]
+      };
 
-    // Ajouter le document à la collection "rooms"
-    await firestore.collection('rooms').doc(roomId).set(roomData);
+      await firestore.collection('rooms').doc(roomId).set(roomData);
+      await firestore
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .add({
+        'text': 'Message de bienvenue',
+        'sender': 'système',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    // Créer une sous-collection "messages" dans le document de la room
-    await firestore.collection('rooms').doc(roomId).collection('messages').add({
-      'text': 'Message de bienvenue', // Exemple de message initial
-      'sender': 'système', // Exemple de l'expéditeur initial
-      'timestamp': FieldValue
-          .serverTimestamp(), // Exemple de timestamp avec heure du serveur
-    });
+      _navigateToChatScreen(roomId, friendUid, context);
+    }
   } catch (e) {
     print('Erreur lors de la création de la room : $e');
   }
+}
+
+
+void _navigateToChatScreen(String roomId, String friendUid, context) {
+  // Navigate to the ChatPage with the roomId and friendUid.
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ChatPage(
+        roomId: roomId,
+        friendUid: friendUid,
+      ),
+    ),
+  );
 }
 
 class FriendCard extends StatelessWidget {
@@ -191,14 +213,7 @@ class FriendCard extends StatelessWidget {
           return Card(
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatPage(
-                        friendUid:
-                            friendUid), // Pass the friendUid to the ChatPage
-                  ),
-                );
+              
               },
               child: ListTile(
                 title: Text('Error loading friend'),
@@ -231,16 +246,9 @@ class FriendCard extends StatelessWidget {
         return Card(
           child: GestureDetector(
             onTap: () {
-              _createOrGetRoomDocument(user!.uid, friendUid);
+              _createOrGetRoomDocument(user!.uid, friendUid, context);
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(
-                      friendUid:
-                          friendUid), // Pass the friendUid to the ChatPage
-                ),
-              );
+             
             },
             child: ListTile(
               leading: CircleAvatar(

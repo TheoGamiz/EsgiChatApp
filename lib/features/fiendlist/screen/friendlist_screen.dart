@@ -67,9 +67,19 @@ class _FriendListState extends State<FriendList> {
 
   Future<void> addFriend(String friendUid) async {
     try {
+      // Ajoutez l'ID de l'utilisateur actuel (widget.user!.uid) dans le tableau "amis" du demandeur (friendUid)
+      await usersCollection.doc(friendUid).update({
+        'amis': FieldValue.arrayUnion([widget.user!.uid]),
+      });
+
+      // Ajoutez l'ID du demandeur (friendUid) dans le tableau "amis" de l'utilisateur actuel (widget.user!.uid)
       await usersCollection.doc(widget.user!.uid).update({
         'amis': FieldValue.arrayUnion([friendUid]),
       });
+
+      // Ensuite, vous pouvez également supprimer la demande d'ami du tableau "demandes" si vous le souhaitez
+      await removeFriendRequest(friendUid);
+
       print('Ami ajouté avec succès.');
     } catch (e) {
       print('Erreur lors de l\'ajout de l\'ami: $e');

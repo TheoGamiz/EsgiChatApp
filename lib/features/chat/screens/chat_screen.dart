@@ -17,8 +17,9 @@ import 'package:uuid/uuid.dart';
 
 class ChatPage extends StatelessWidget {
   final String friendUid;
+  final String roomId;
 
-  ChatPage({required this.friendUid}) : super();
+  ChatPage({required this.friendUid, required this.roomId}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class ChatPage extends StatelessWidget {
     );
   }
 }
+
 class ChatWidget extends StatefulWidget {
   final String friendUid;
 
@@ -37,7 +39,6 @@ class ChatWidget extends StatefulWidget {
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-  
   List<types.Message> _messages = [];
   final _user = const types.User(
     id: '82091008-a484-4a89-ae75-a22bf8d6f3ac',
@@ -108,7 +109,8 @@ class _ChatWidgetState extends State<ChatWidget> {
         author: _user,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         id: const Uuid().v4(),
-        mimeType: lookupMimeType(result.files.single.path ?? "") ?? 'application/*',
+        mimeType:
+            lookupMimeType(result.files.single.path ?? "") ?? 'application/*',
         name: result.files.single.name,
         size: result.files.single.size,
         uri: result.files.single.path ?? "",
@@ -151,9 +153,9 @@ class _ChatWidgetState extends State<ChatWidget> {
       if (message.uri.startsWith('http')) {
         try {
           final index =
-          _messages.indexWhere((element) => element.id == message.id);
+              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-          (_messages[index] as types.FileMessage).copyWith(
+              (_messages[index] as types.FileMessage).copyWith(
             isLoading: true,
           );
 
@@ -173,9 +175,9 @@ class _ChatWidgetState extends State<ChatWidget> {
           }
         } finally {
           final index =
-          _messages.indexWhere((element) => element.id == message.id);
+              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-          (_messages[index] as types.FileMessage).copyWith(
+              (_messages[index] as types.FileMessage).copyWith(
             isLoading: null,
           );
 
@@ -190,9 +192,9 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _handlePreviewDataFetched(
-      types.TextMessage message,
-      types.PreviewData previewData,
-      ) {
+    types.TextMessage message,
+    types.PreviewData previewData,
+  ) {
     final index = _messages.indexWhere((element) => element.id == message.id);
     final updatedMessage = (_messages[index] as types.TextMessage).copyWith(
       previewData: previewData,
@@ -234,15 +236,15 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Chat(
-      messages: _messages,
-      onAttachmentPressed: _handleAttachmentPressed,
-      onMessageTap: _handleMessageTap,
-      onPreviewDataFetched: _handlePreviewDataFetched,
-      onSendPressed: _handleSendPressed,
-      showUserAvatars: true,
-      showUserNames: true,
-      user: _user,
-    ),
-  );
+        body: Chat(
+          messages: _messages,
+          onAttachmentPressed: _handleAttachmentPressed,
+          onMessageTap: _handleMessageTap,
+          onPreviewDataFetched: _handlePreviewDataFetched,
+          onSendPressed: _handleSendPressed,
+          showUserAvatars: true,
+          showUserNames: true,
+          user: _user,
+        ),
+      );
 }
