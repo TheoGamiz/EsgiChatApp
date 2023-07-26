@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
             )..add(AuthenticationStarted()),
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
-              initialRoute: NavBar.routeName,//FirebaseAuth.instance.currentUser == null ? LoginScreen.routeName : NavBar.routeName,
+              initialRoute: LoginScreen.routeName,//FirebaseAuth.instance.currentUser == null ? LoginScreen.routeName : NavBar.routeName,
               routes: {
                 //"/": (context) => FirebaseAuth.instance.currentUser == null ? LoginScreen() : HomeScreen(),
                 LoginScreen.routeName: (context) => LoginScreen(),

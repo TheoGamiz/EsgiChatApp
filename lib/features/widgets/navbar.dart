@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
-
 import '../home/screens/home_screen.dart';
 
 class NavBar extends StatefulWidget {
@@ -15,6 +14,8 @@ class NavBar extends StatefulWidget {
   static void navigateTo(BuildContext context) {
     Navigator.of(context).pushNamed(routeName);
   }
+
+  final User user = FirebaseAuth.instance.currentUser!;
 
   @override
   State<NavBar> createState() => _NavBarState();
@@ -30,9 +31,9 @@ class _NavBarState extends State<NavBar> {
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
-      HomeScreen(/*user: widget.user*/),
-      FriendList(),
-      //Profile(user: widget.user),
+      HomeScreen(user: widget.user),
+      FriendList(user: widget.user),
+      Profile(user: widget.user),
     ];
   }
 
