@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -14,25 +12,46 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatPage extends StatelessWidget {
   final String friendUid;
   final String roomId;
+  final String userId; // Nouveau champ pour l'ID de l'utilisateur
 
-  ChatPage({required this.friendUid, required this.roomId}) : super();
+  ChatPage({
+    required this.friendUid,
+    required this.roomId,
+    required this.userId,
+  }) : super();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChatWidget(friendUid: friendUid), // Pass friendUid to ChatWidget
+      appBar: AppBar(
+        title:
+            Text('Room ID: $roomId'), // Afficher le roomId en haut de la page
+      ),
+      body: ChatWidget(
+        friendUid: friendUid,
+        roomId: roomId,
+        userId: userId, // Passer l'ID de l'utilisateur à ChatWidget
+      ),
     );
   }
 }
 
 class ChatWidget extends StatefulWidget {
   final String friendUid;
+  final String roomId;
+  final String userId; // Nouveau champ pour l'ID de l'utilisateur
 
-  const ChatWidget({required this.friendUid}) : super();
+  const ChatWidget({
+    required this.friendUid,
+    required this.roomId,
+    required this.userId,
+  }) : super();
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
@@ -40,13 +59,14 @@ class ChatWidget extends StatefulWidget {
 
 class _ChatWidgetState extends State<ChatWidget> {
   List<types.Message> _messages = [];
-  final _user = const types.User(
-    id: '82091008-a484-4a89-ae75-a22bf8d6f3ac',
-  );
+  late final types.User _user; // Déclarer _user comme une variable dynamique
 
   @override
   void initState() {
     super.initState();
+    _user = types.User(
+      id: widget.userId, // Utilisez l'ID de l'utilisateur actuellement connecté
+    );
     _loadMessages();
   }
 
@@ -205,7 +225,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
   }
 
-  void _handleSendPressed(types.PartialText message) {
+  void _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -213,11 +233,30 @@ class _ChatWidgetState extends State<ChatWidget> {
       text: message.text,
     );
 
+    final roomId = widget.roomId; // Access the roomId
+
+    // Save the message to the room's "messages" collection in Firestore
+    try {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      await firestore
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .add({
+        'text': message.text,
+        'senderId': _user.id,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Erreur lors de l\'envoi du message : $e');
+    }
+
     _addMessage(textMessage);
   }
 
   void _loadMessages() async {
     final friendUid = widget.friendUid;
+    final roomId = widget.roomId; // Access the roomId
 
     final response = await rootBundle.loadString('assets/messages.json');
     final messages = (jsonDecode(response) as List)
@@ -225,12 +264,12 @@ class _ChatWidgetState extends State<ChatWidget> {
         .toList();
 
     setState(() {
-      _messages = messages.where((message) {
-        // Filter messages to show only those exchanged between the current user and the friend
-        return (message.author.id == _user.id &&
-                message.author.id == friendUid) ||
-            (message.author.id == friendUid && message.author.id == _user.id);
-      }).toList();
+      _messages = messages
+          .where((message) =>
+              (message.author.id == _user.id &&
+                  message.author.id == friendUid) ||
+              (message.author.id == friendUid && message.author.id == _user.id))
+          .toList();
     });
   }
 

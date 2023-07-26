@@ -145,7 +145,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-void _createOrGetRoomDocument(String userId, String friendUid, BuildContext context) async {
+void _createOrGetRoomDocument(String userId, String friendUid, BuildContext context, User? user) async {
   try {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -157,7 +157,7 @@ void _createOrGetRoomDocument(String userId, String friendUid, BuildContext cont
     if (querySnapshot.docs.isNotEmpty) {
       // If a room already exists with these participants, use that room.
       final roomId = querySnapshot.docs.first.id;
-      _navigateToChatScreen(roomId, friendUid, context);
+      _navigateToChatScreen(roomId, friendUid, context, user);
     } else {
       // If no room exists, create a new room.
       String roomId = firestore.collection('rooms').doc().id;
@@ -176,7 +176,7 @@ void _createOrGetRoomDocument(String userId, String friendUid, BuildContext cont
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      _navigateToChatScreen(roomId, friendUid, context);
+      _navigateToChatScreen(roomId, friendUid, context, user);
     }
   } catch (e) {
     print('Erreur lors de la création de la room : $e');
@@ -184,14 +184,14 @@ void _createOrGetRoomDocument(String userId, String friendUid, BuildContext cont
 }
 
 
-void _navigateToChatScreen(String roomId, String friendUid, context) {
+void _navigateToChatScreen(String roomId, String friendUid, context,User? user) {
   // Navigate to the ChatPage with the roomId and friendUid.
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => ChatPage(
         roomId: roomId,
-        friendUid: friendUid,
+        friendUid: friendUid, userId: user!.uid,
       ),
     ),
   );
@@ -246,7 +246,7 @@ class FriendCard extends StatelessWidget {
         return Card(
           child: GestureDetector(
             onTap: () {
-              _createOrGetRoomDocument(user!.uid, friendUid, context);
+              _createOrGetRoomDocument(user!.uid, friendUid, context, user);
 
              
             },
