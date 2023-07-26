@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
-
 import '../home/screens/home_screen.dart';
 
 class NavBar extends StatefulWidget {
@@ -29,11 +28,10 @@ class _NavBarState extends State<NavBar> {
     super.initState();
     _widgetOptions = <Widget>[
       HomeScreen(user: widget.user),
-      FriendList(),
       Profile(user: widget.user),
-
     ];
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +67,6 @@ class _NavBarState extends State<NavBar> {
                 GButton(
                   icon: LineIcons.home,
                   text: 'Home',
-                ),
-                GButton(
-                  icon: LineIcons.userFriends,
-                  text: 'Amis',
                 ),
                 GButton(
                   icon: LineIcons.user,
