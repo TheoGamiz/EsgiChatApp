@@ -1,5 +1,5 @@
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
+import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.dart';
+import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:esgi_chat_app/features/widgets/gradient_button.dart';
 import '../bloc/register_bloc.dart';
 import '../bloc/register_event.dart';

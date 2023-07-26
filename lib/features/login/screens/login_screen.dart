@@ -26,22 +26,10 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      //body with text
-      body : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('An error occured'),
-            ElevatedButton(
-              onPressed: () => {},
-              child: const Text('Retry'),
-            ),
-          ],
+      body: BlocProvider<LoginBloc>(
+        create: (context) => LoginBloc(
+          userRepository: context.read<UserRepository>(),
         ),
-      ),
-
-      /*body: BlocProvider<LoginBloc>(
-        create: (context) => LoginBloc(),
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(
@@ -74,17 +62,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                /*Container(
+                Container(
                   margin: const EdgeInsets.only(top: 230),
-                  child: LoginForm(
-                    userRepository: widget._userRepository,
-                  ),
-                )*/
+                  child: LoginForm(),
+                )
               ],
             ),
           ),
         ),
-      ),*/
+      ),
     );
   }
 }

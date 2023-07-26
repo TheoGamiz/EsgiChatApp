@@ -12,6 +12,10 @@ import '../home/screens/home_screen.dart';
 class NavBar extends StatefulWidget {
   static const routeName = '/navBar';
 
+  static void navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   @override
   State<NavBar> createState() => _NavBarState();
 }

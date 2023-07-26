@@ -1,5 +1,4 @@
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
+import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,17 +1,8 @@
 import 'package:esgi_chat_app/app/app.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
-//import 'package:esgi_chat_app/blocs/simple_bloc_observer.dart';
-import 'package:esgi_chat_app/features/home/screens/home_screen.dart';
-import 'package:esgi_chat_app/features/login/screens/login_screen.dart';
-import 'package:esgi_chat_app/features/repository/user_repository.dart';
-import 'package:esgi_chat_app/features/widgets/navbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'blocs/authentication_bloc/authentication_bloc.dart';
-import 'blocs/authentication_bloc/authentication_event.dart';
 import 'firebase_options.dart';
 
 

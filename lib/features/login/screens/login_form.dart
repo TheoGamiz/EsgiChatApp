@@ -1,7 +1,8 @@
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
+import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.dart';
+import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:esgi_chat_app/features/register/screens/register_screen.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
+import 'package:esgi_chat_app/features/widgets/navbar.dart';
 import '../../widgets/gradient_button.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_event.dart';
@@ -10,11 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginForm extends StatefulWidget {
-  final UserRepository _userRepository;
-
-  const LoginForm({required UserRepository userRepository})
-      : _userRepository = userRepository,
-        super();
 
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -82,9 +78,11 @@ class _LoginFormState extends State<LoginForm> {
         }
 
         if (state.isSuccess) {
-          BlocProvider.of<AuthenticationBloc>(context).add(
+          /*BlocProvider.of<AuthenticationBloc>(context).add(
             AuthenticationLoggedIn(),
-          );
+          );*/
+          context.read<AuthenticationBloc>().add(AuthenticationLoggedIn());
+          NavBar.navigateTo(context);
         }
       },
       child: BlocBuilder<LoginBloc, LoginState>(
@@ -151,9 +149,10 @@ class _LoginFormState extends State<LoginForm> {
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
                         return RegisterScreen(
-                          userRepository: widget._userRepository,
+                          userRepository: context.read<UserRepository>(),
                         );
                       }));
+
                     },
                     text: Text(
                       'Register',
