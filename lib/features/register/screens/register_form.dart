@@ -178,7 +178,9 @@ class _RegisterFormState extends State<RegisterForm> {
         Map<String, dynamic> userInfo = {
           'email': email,
           'createdAt':
-              DateTime.now(), // Facultatif : stocker l'heure de création
+              DateTime.now(),
+            'demandes': [],
+            'amis' : []// Facultatif : stocker l'heure de création
           // Ajouter toute autre information que vous souhaitez stocker
         };
 

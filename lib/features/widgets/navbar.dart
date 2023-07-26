@@ -28,6 +28,7 @@ class _NavBarState extends State<NavBar> {
     super.initState();
     _widgetOptions = <Widget>[
       HomeScreen(user: widget.user),
+      FriendList(user: widget.user),
       Profile(user: widget.user),
     ];
   }
@@ -36,6 +37,7 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text("Mes Demandes d'Amis"),),
       backgroundColor: Colors.white,
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
@@ -67,6 +69,10 @@ class _NavBarState extends State<NavBar> {
                 GButton(
                   icon: LineIcons.home,
                   text: 'Home',
+                ),
+                GButton(
+                  icon: LineIcons.userFriends,
+                  text: 'Amis',
                 ),
                 GButton(
                   icon: LineIcons.user,
