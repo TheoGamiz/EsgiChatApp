@@ -1,3 +1,6 @@
+import 'package:esgi_chat_app/app/app_router.dart';
+import 'package:esgi_chat_app/features/login/bloc/login_bloc.dart';
+import 'package:esgi_chat_app/features/widgets/navbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
@@ -10,19 +13,9 @@ import '../../login/screens/login_screen.dart';
 import '../../repository/user_repository.dart';
 import '../../test/rooms.dart';
 
-class HomeScreen extends StatefulWidget {
-  static const routeName = '/';
+class HomeScreen extends StatelessWidget {
+  static const routeName = '/home';
 
-  //final User user;
-  //state.firebaseUser
-
-  const HomeScreen(/*{required this.user}*/) : super();
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,29 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-        builder: (context, state) {
-          if (state is AuthenticationFailure) {
-            return LoginScreen(
-              userRepository: context.read<UserRepository>(),
-            );
-          }
-
-          if (state is AuthenticationSuccess) {
-            /*return HomeScreen(
-              user: state.firebaseUser,
-            );*/
-            const RoomsPage();
-          }
-
-          return Scaffold(
-            appBar: AppBar(),
-            body: Container(
-              child: Center(child: Text("Loading")),
-            ),
-          );
-        },
-      ),//const RoomsPage()//ChatPage(),
+      body: Center(child: Text("Loading")),
     );
   }
 }

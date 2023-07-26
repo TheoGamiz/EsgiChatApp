@@ -5,12 +5,13 @@ import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dar
 import 'package:esgi_chat_app/features/home/screens/home_screen.dart';
 import 'package:esgi_chat_app/features/login/screens/login_screen.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
+import 'package:esgi_chat_app/features/widgets/navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +26,12 @@ class MyApp extends StatelessWidget {
               userRepository: context.read<UserRepository>(),
             )..add(AuthenticationStarted()),
             child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              initialRoute: FirebaseAuth.instance.currentUser == null ? "/" : NavBar.routeName,
               routes: {
-                HomeScreen.routeName: (context) => HomeScreen(),
+                //"/": (context) => FirebaseAuth.instance.currentUser == null ? LoginScreen() : HomeScreen(),
+                "/": (context) => LoginScreen(),
+                NavBar.routeName: (context) => NavBar(),
                 //AddPostScreen.routeName: (context) => AddPostScreen(),
               },
               //onGenerateRoute: AppRouter.onGenerateRoute,

@@ -7,10 +7,10 @@ import 'package:esgi_chat_app/core/utils/validators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final UserRepository _userRepository;
+  final UserRepository userRepository;
 
   LoginBloc({required UserRepository userRepository})
-      : _userRepository = userRepository,
+      : userRepository = userRepository,
         super(LoginState.initial());
 
   @override
@@ -37,7 +37,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       {required String email, required String password}) async* {
     yield LoginState.loading();
     try {
-      await _userRepository.signInWithCredentials(email, password);
+      await userRepository.signInWithCredentials(email, password);
       yield LoginState.success();
     } catch (_) {
       yield LoginState.failure();

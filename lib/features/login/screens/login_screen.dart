@@ -6,14 +6,18 @@ import './login_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+class LoginScreen extends StatefulWidget {
+  static const routeName = '/login';
 
-class LoginScreen extends StatelessWidget {
-  final UserRepository _userRepository;
+  static void navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
 
-  const LoginScreen({required UserRepository userRepository})
-      : _userRepository = userRepository,
-        super();
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
+class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,8 +26,22 @@ class LoginScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: BlocProvider<LoginBloc>(
-        create: (context) => LoginBloc(userRepository: _userRepository),
+      //body with text
+      body : Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('An error occured'),
+            ElevatedButton(
+              onPressed: () => {},
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+
+      /*body: BlocProvider<LoginBloc>(
+        create: (context) => LoginBloc(),
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(
@@ -56,17 +74,17 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(
+                /*Container(
                   margin: const EdgeInsets.only(top: 230),
                   child: LoginForm(
-                    userRepository: _userRepository,
+                    userRepository: widget._userRepository,
                   ),
-                )
+                )*/
               ],
             ),
           ),
         ),
-      ),
+      ),*/
     );
   }
 }
