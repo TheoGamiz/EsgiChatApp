@@ -1,7 +1,8 @@
 
+import 'package:esgi_chat_app/features/repository/user_repository.dart';
+
 import 'login_event.dart';
 import 'login_state.dart';
-import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
 import 'package:esgi_chat_app/core/utils/validators.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

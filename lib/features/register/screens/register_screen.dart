@@ -1,7 +1,8 @@
+import 'package:esgi_chat_app/features/repository/user_repository.dart';
+import 'package:esgi_chat_app/features/widgets/curved_widget.dart';
+
 import '../bloc/register_bloc.dart';
-import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
-import './register_form.dart';
-import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
+import 'register_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

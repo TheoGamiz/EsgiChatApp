@@ -1,11 +1,11 @@
+import 'package:esgi_chat_app/features/repository/user_repository.dart';
+
+import '../../widgets/curved_widget.dart';
 import '../bloc/login_bloc.dart';
-import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
 import './login_form.dart';
-import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
 
 class LoginScreen extends StatelessWidget {
   final UserRepository _userRepository;
