@@ -9,7 +9,7 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final UserRepository _userRepository;
 
-  AuthenticationBloc({UserRepository userRepository})
+  AuthenticationBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
         super(AuthenticationInitial());
 
@@ -33,7 +33,8 @@ class AuthenticationBloc
 
   //AuthenticationLoggedIn
   Stream<AuthenticationState> _mapAuthenticationLoggedInToState() async* {
-    yield AuthenticationSuccess(await _userRepository.getUser());
+    final firebaseUser = await _userRepository.getUser();
+    if(firebaseUser != null) yield AuthenticationSuccess(firebaseUser);
   }
 
   // AuthenticationStarted
@@ -41,7 +42,7 @@ class AuthenticationBloc
     final isSignedIn = await _userRepository.isSignedIn();
     if (isSignedIn) {
       final firebaseUser = await _userRepository.getUser();
-      yield AuthenticationSuccess(firebaseUser);
+      if(firebaseUser != null) yield AuthenticationSuccess(firebaseUser);
     } else {
       yield AuthenticationFailure();
     }

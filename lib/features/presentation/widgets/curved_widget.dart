@@ -6,8 +6,8 @@ class CurvedWidget extends StatelessWidget {
   final double curvedHeight;
 
   const CurvedWidget(
-      {Key key, this.curvedDistance = 80, this.curvedHeight = 80,  this.child})
-      : super(key: key);
+      {this.curvedDistance = 80, this.curvedHeight = 80,  required this.child})
+      : super();
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class CurvedWidgetBackgroundClipper extends CustomClipper<Path> {
   final double curvedDistance;
   final double curvedHeight;
 
-  CurvedWidgetBackgroundClipper({ this.curvedDistance,  this.curvedHeight});
+  CurvedWidgetBackgroundClipper({ required this.curvedDistance,  required this.curvedHeight});
 
   @override
   getClip(Size size) {

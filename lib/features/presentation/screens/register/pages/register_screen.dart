@@ -8,9 +8,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class RegisterScreen extends StatelessWidget {
   final UserRepository _userRepository;
 
-  const RegisterScreen({Key key, UserRepository userRepository})
+  const RegisterScreen({required UserRepository userRepository})
       : _userRepository = userRepository,
-        super(key: key);
+        super();
 
   @override
   Widget build(BuildContext context) {

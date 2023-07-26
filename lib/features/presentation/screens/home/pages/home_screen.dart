@@ -6,10 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
+import '../../chat/pages/chat_screen.dart';
+import '../../test/rooms.dart';
+
 class HomeScreen extends StatelessWidget {
   final User user;
 
-  const HomeScreen({ Key key,  this.user}) : super(key: key);
+  const HomeScreen({required this.user}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +29,7 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Center(
-            child: Text("Hello, ${user.email}"),
-          ),
-        ],
-      ),
+      body: const RoomsPage()//ChatPage(),
     );
   }
 }

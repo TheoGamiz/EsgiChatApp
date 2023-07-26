@@ -10,9 +10,9 @@ import 'package:esgi_chat_app/features/presentation/widgets/curved_widget.dart';
 class LoginScreen extends StatelessWidget {
   final UserRepository _userRepository;
 
-  const LoginScreen({Key key, UserRepository userRepository})
+  const LoginScreen({required UserRepository userRepository})
       : _userRepository = userRepository,
-        super(key: key);
+        super();
 
   @override
   Widget build(BuildContext context) {

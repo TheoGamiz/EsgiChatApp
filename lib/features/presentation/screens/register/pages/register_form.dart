@@ -23,7 +23,7 @@ class _LoginFormState extends State<RegisterForm> {
     return state.isFormValid && isPopulated && !state.isSubmitting;
   }
 
-  RegisterBloc _registerBloc;
+  late RegisterBloc _registerBloc;
 
   @override
   void initState() {

@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final UserRepository _userRepository;
 
-  LoginBloc({UserRepository userRepository})
+  LoginBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
         super(LoginState.initial());
 
@@ -33,7 +33,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   Stream<LoginState> _mapLoginWithCredentialsPressedToState(
-      {String email, String password}) async* {
+      {required String email, required String password}) async* {
     yield LoginState.loading();
     try {
       await _userRepository.signInWithCredentials(email, password);

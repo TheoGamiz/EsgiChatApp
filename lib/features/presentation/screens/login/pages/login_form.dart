@@ -12,9 +12,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class LoginForm extends StatefulWidget {
   final UserRepository _userRepository;
 
-  const LoginForm({Key key, UserRepository userRepository})
+  const LoginForm({required UserRepository userRepository})
       : _userRepository = userRepository,
-        super(key: key);
+        super();
 
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -31,7 +31,7 @@ class _LoginFormState extends State<LoginForm> {
     return state.isFormValid && isPopulated && !state.isSubmitting;
   }
 
-  LoginBloc _loginBloc;
+  late LoginBloc _loginBloc;
 
   @override
   void initState() {

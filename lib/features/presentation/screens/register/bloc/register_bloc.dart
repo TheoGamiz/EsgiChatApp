@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final UserRepository _userRepository;
 
-  RegisterBloc({UserRepository userRepository})
+  RegisterBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
         super(RegisterState.initial());
 
@@ -33,7 +33,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   }
 
   Stream<RegisterState> _mapRegisterSubmittedToState(
-      {String email, String password}) async* {
+      {required String email, required String password}) async* {
     yield RegisterState.loading();
     try {
       await _userRepository.signUp(email, password);

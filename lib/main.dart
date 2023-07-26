@@ -1,9 +1,9 @@
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 //import 'package:esgi_chat_app/blocs/simple_bloc_observer.dart';
 import 'package:esgi_chat_app/features/domain/repository/user_repository.dart';
-import 'package:esgi_chat_app/features/presentation/screens/chat/pages/chat_screen.dart';
 import 'package:esgi_chat_app/features/presentation/screens/home/pages/home_screen.dart';
 import 'package:esgi_chat_app/features/presentation/screens/login/pages/login_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,9 +11,26 @@ import 'blocs/authentication_bloc/authentication_bloc.dart';
 import 'blocs/authentication_bloc/authentication_event.dart';
 import 'firebase_options.dart';
 
+
+Future<void> handleBackgroundMessage(RemoteMessage message) async {
+  print("Handling a background message: ${message.notification?.title}");
+}
+
+class FirebaseApi {
+  final _firebaseMessaging = FirebaseMessaging.instance;
+
+  Future<void> initNotifications() async {
+    await _firebaseMessaging.requestPermission();
+    String? token = await _firebaseMessaging.getToken();
+    print("FirebaseMessaging token: $token");
+    FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseApi().initNotifications();
   //Bloc.observer = SimpleBlocObserver();
   final UserRepository userRepository = UserRepository();
   runApp(
@@ -31,7 +48,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   final UserRepository _userRepository;
 
-  MyApp({UserRepository userRepository}) : _userRepository = userRepository;
+  MyApp({required UserRepository userRepository}) : _userRepository = userRepository;
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +68,9 @@ class MyApp extends StatelessWidget {
           }
 
           if (state is AuthenticationSuccess) {
-            return ChatScreen(); /*HomeScreen(
+            return HomeScreen(
               user: state.firebaseUser,
-            );*/
+            );
           }
 
           return Scaffold(

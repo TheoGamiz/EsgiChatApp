@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class GradientButton extends StatelessWidget {
-  final double width;
-  final double height;
-  final Function onPressed;
+  final double? width;
+  final double? height;
+  final void Function()? onPressed;
   final Text text;
   final Icon icon;
 
   const GradientButton(
-      {Key key, this.width, this.height, this.onPressed, this.text, this.icon})
-      : super(key: key);
+      {this.width, this.height, this.onPressed, required this.text, required this.icon})
+      : super();
 
   @override
   Widget build(BuildContext context) {
