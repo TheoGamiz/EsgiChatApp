@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                   itemCount: friends.length,
                   itemBuilder: (context, index) {
                     final friendUid = friends[index] as String;
-                    return FriendCard(friendUid: friendUid);
+                    return FriendCard(friendUid: friendUid, user: user);
                   },
                 );
               },
@@ -143,15 +143,43 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
-
 }
 
+void _createOrGetRoomDocument(String userId, String friendUid) async {
+  print("JE CREE UNE ROOM AVANT");
 
+  try {
+    print("JE CREE UNE ROOM TRY");
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    // Générer un nouvel ID pour le document de la room
+    String roomId = firestore.collection('rooms').doc().id;
+
+    // Définir les données du document
+    Map<String, dynamic> roomData = {
+      'participants': [userId, friendUid]
+    };
+
+    // Ajouter le document à la collection "rooms"
+    await firestore.collection('rooms').doc(roomId).set(roomData);
+
+    // Créer une sous-collection "messages" dans le document de la room
+    await firestore.collection('rooms').doc(roomId).collection('messages').add({
+      'text': 'Message de bienvenue', // Exemple de message initial
+      'sender': 'système', // Exemple de l'expéditeur initial
+      'timestamp': FieldValue
+          .serverTimestamp(), // Exemple de timestamp avec heure du serveur
+    });
+  } catch (e) {
+    print('Erreur lors de la création de la room : $e');
+  }
+}
 
 class FriendCard extends StatelessWidget {
   final String friendUid;
+  final User? user;
 
-  FriendCard({required this.friendUid}) : super();
+  FriendCard({required this.friendUid, this.user}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +194,9 @@ class FriendCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ChatPage(friendUid: friendUid), // Pass the friendUid to the ChatPage
+                    builder: (context) => ChatPage(
+                        friendUid:
+                            friendUid), // Pass the friendUid to the ChatPage
                   ),
                 );
               },
@@ -201,10 +231,14 @@ class FriendCard extends StatelessWidget {
         return Card(
           child: GestureDetector(
             onTap: () {
+              _createOrGetRoomDocument(user!.uid, friendUid);
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChatPage(friendUid: friendUid), // Pass the friendUid to the ChatPage
+                  builder: (context) => ChatPage(
+                      friendUid:
+                          friendUid), // Pass the friendUid to the ChatPage
                 ),
               );
             },
@@ -222,5 +256,3 @@ class FriendCard extends StatelessWidget {
     );
   }
 }
-
-
