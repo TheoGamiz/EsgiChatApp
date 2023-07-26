@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
@@ -11,14 +9,14 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:uuid/Uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatPage extends StatelessWidget {
   final String friendUid;
   final String roomId;
-  final String userId; // Nouveau champ pour l'ID de l'utilisateur
+  final String userId;
 
   ChatPage({
     required this.friendUid,
@@ -30,13 +28,12 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text('Room ID: $roomId'), // Afficher le roomId en haut de la page
+        title: Text('Room ID: $roomId'),
       ),
       body: ChatWidget(
         friendUid: friendUid,
         roomId: roomId,
-        userId: userId, // Passer l'ID de l'utilisateur à ChatWidget
+        userId: userId,
       ),
     );
   }
@@ -45,7 +42,7 @@ class ChatPage extends StatelessWidget {
 class ChatWidget extends StatefulWidget {
   final String friendUid;
   final String roomId;
-  final String userId; // Nouveau champ pour l'ID de l'utilisateur
+  final String userId;
 
   const ChatWidget({
     required this.friendUid,
@@ -59,13 +56,13 @@ class ChatWidget extends StatefulWidget {
 
 class _ChatWidgetState extends State<ChatWidget> {
   List<types.Message> _messages = [];
-  late final types.User _user; // Déclarer _user comme une variable dynamique
+  late final types.User _user;
 
   @override
   void initState() {
     super.initState();
     _user = types.User(
-      id: widget.userId, // Utilisez l'ID de l'utilisateur actuellement connecté
+      id: widget.userId,
     );
     _loadMessages();
   }
@@ -130,10 +127,10 @@ class _ChatWidgetState extends State<ChatWidget> {
         createdAt: DateTime.now().millisecondsSinceEpoch,
         id: const Uuid().v4(),
         mimeType:
-            lookupMimeType(result.files.single.path ?? "") ?? 'application/*',
+            lookupMimeType(result.files.single.path ?? '') ?? 'application/*',
         name: result.files.single.name,
         size: result.files.single.size,
-        uri: result.files.single.path ?? "",
+        uri: result.files.single.path ?? '',
       );
 
       _addMessage(message);
@@ -233,7 +230,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       text: message.text,
     );
 
-    final roomId = widget.roomId; // Access the roomId
+    final roomId = widget.roomId;
 
     // Save the message to the room's "messages" collection in Firestore
     try {
@@ -254,22 +251,29 @@ class _ChatWidgetState extends State<ChatWidget> {
     _addMessage(textMessage);
   }
 
-  void _loadMessages() async {
-    final friendUid = widget.friendUid;
-    final roomId = widget.roomId; // Access the roomId
+  void _loadMessages() {
+    final roomId = widget.roomId;
 
-    final response = await rootBundle.loadString('assets/messages.json');
-    final messages = (jsonDecode(response) as List)
-        .map((e) => types.Message.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    setState(() {
-      _messages = messages
-          .where((message) =>
-              (message.author.id == _user.id &&
-                  message.author.id == friendUid) ||
-              (message.author.id == friendUid && message.author.id == _user.id))
+    FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      final messages = snapshot.docs
+          .map((doc) => types.TextMessage(
+                author: types.User(id: doc['senderId']),
+                createdAt:
+                    (doc['timestamp'] as Timestamp).millisecondsSinceEpoch,
+                id: doc.id,
+                text: doc['text'],
+              ))
           .toList();
+
+      setState(() {
+        _messages = messages;
+      });
     });
   }
 
