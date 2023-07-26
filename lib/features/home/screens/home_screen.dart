@@ -9,7 +9,7 @@ import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dar
 import '../../test/rooms.dart';
 
 class HomeScreen extends StatelessWidget {
-  final User user;
+  final User? user;
 
   const HomeScreen({required this.user}) : super();
 

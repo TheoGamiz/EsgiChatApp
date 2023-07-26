@@ -3,6 +3,7 @@ import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dar
 import 'package:esgi_chat_app/features/home/screens/home_screen.dart';
 import 'package:esgi_chat_app/features/login/screens/login_screen.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
+import 'package:esgi_chat_app/features/widgets/navbar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,7 +69,7 @@ class MyApp extends StatelessWidget {
           }
 
           if (state is AuthenticationSuccess) {
-            return HomeScreen(
+            return NavBar(
               user: state.firebaseUser,
             );
           }
