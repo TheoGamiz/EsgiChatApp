@@ -16,21 +16,28 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatPage extends StatelessWidget {
+  final String friendUid;
+
+  ChatPage({required this.friendUid}) : super();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChatWidget(),
+      body: ChatWidget(friendUid: friendUid), // Pass friendUid to ChatWidget
     );
   }
 }
 class ChatWidget extends StatefulWidget {
-  const ChatWidget() : super();
+  final String friendUid;
+
+  const ChatWidget({required this.friendUid}) : super();
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
+  
   List<types.Message> _messages = [];
   final _user = const types.User(
     id: '82091008-a484-4a89-ae75-a22bf8d6f3ac',
@@ -208,13 +215,20 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _loadMessages() async {
+    final friendUid = widget.friendUid;
+
     final response = await rootBundle.loadString('assets/messages.json');
     final messages = (jsonDecode(response) as List)
         .map((e) => types.Message.fromJson(e as Map<String, dynamic>))
         .toList();
 
     setState(() {
-      _messages = messages;
+      _messages = messages.where((message) {
+        // Filter messages to show only those exchanged between the current user and the friend
+        return (message.author.id == _user.id &&
+                message.author.id == friendUid) ||
+            (message.author.id == friendUid && message.author.id == _user.id);
+      }).toList();
     });
   }
 

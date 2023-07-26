@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
+import '../../chat/screens/chat_screen.dart';
 import '../../test/rooms.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -145,6 +146,8 @@ class HomeScreen extends StatelessWidget {
 
 }
 
+
+
 class FriendCard extends StatelessWidget {
   final String friendUid;
 
@@ -158,8 +161,18 @@ class FriendCard extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Card(
-            child: ListTile(
-              title: Text('Error loading friend'),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPage(friendUid: friendUid), // Pass the friendUid to the ChatPage
+                  ),
+                );
+              },
+              child: ListTile(
+                title: Text('Error loading friend'),
+              ),
             ),
           );
         }
@@ -186,17 +199,28 @@ class FriendCard extends StatelessWidget {
             'https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${friendUid}.png?alt=media';
 
         return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(imageUrl),
-              radius: 20, // Adjust the size as needed
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(friendUid: friendUid), // Pass the friendUid to the ChatPage
+                ),
+              );
+            },
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(imageUrl),
+                radius: 20, // Adjust the size as needed
+              ),
+              title: Text(friendEmail),
+              // Display any other friend information here, such as name, profile picture, etc.
             ),
-            title: Text(friendEmail),
-            // Display any other friend information here, such as name, profile picture, etc.
           ),
         );
       },
     );
   }
 }
+
 
