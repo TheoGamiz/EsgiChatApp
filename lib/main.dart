@@ -1,7 +1,7 @@
+import 'package:esgi_chat_app/app/app.dart';
 import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 //import 'package:esgi_chat_app/blocs/simple_bloc_observer.dart';
 import 'package:esgi_chat_app/features/home/screens/home_screen.dart';
-import 'package:esgi_chat_app/features/login/screens/login_screen.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +27,14 @@ class FirebaseApi {
   }
 }
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseApi().initNotifications();
+
+  runApp(const MyApp());
+}
+/*
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -83,4 +91,4 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-}
+}*/
