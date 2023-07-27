@@ -7,6 +7,8 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_icons/line_icons.dart';
 import '../home/screens/home_screen.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class NavBar extends StatefulWidget {
   //const NavBar({super.key, this.user});
   //final User? user;

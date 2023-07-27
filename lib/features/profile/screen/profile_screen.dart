@@ -41,7 +41,7 @@ class _ProfileState extends State<Profile> {
           firebase_storage.FirebaseStorage.instance.ref('$uid.png');
       await storageRef.putFile(_selectedImage!);
     } catch (e) {
-      print('Error uploading image : $e');
+      print("Impossible de mettre à jour l'image : $e");
     }
   }
 
@@ -101,7 +101,8 @@ class _ProfileState extends State<Profile> {
                 onPressed: () {
                   BlocProvider.of<AuthenticationBloc>(context)
                       .add(AuthenticationLoggedOut());
-                  LoginScreen.navigateTo(context);
+                  Navigator.pushNamedAndRemoveUntil(context, LoginScreen.routeName, (route) => false);
+
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.red,

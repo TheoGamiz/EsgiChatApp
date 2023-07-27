@@ -40,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.block,
+              isBlocked ? Icons.notifications_off : Icons.notifications_active,
               color: isBlocked ? Colors.red : null,
             ),
             onPressed: () {

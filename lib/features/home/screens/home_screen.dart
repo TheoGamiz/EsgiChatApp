@@ -3,7 +3,6 @@ import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.d
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../chat/screens/chat_screen.dart';
 
@@ -12,10 +11,16 @@ class HomeScreen extends StatelessWidget {
   final User user = FirebaseAuth.instance.currentUser!;
   final TextEditingController _friendUidController = TextEditingController();
 
+
   HomeScreen() : super();
 
   @override
   Widget build(BuildContext context) {
+    final friendUid = ModalRoute.of(context)!.settings.arguments ?? "";
+    if(friendUid != "") {
+      _createOrGetRoomDocument(friendUid as String, context, user);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Messages'),
@@ -140,26 +145,21 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-void _createOrGetRoomDocument(
-    String userId, String friendUid, BuildContext context, User? user) async {
+void _createOrGetRoomDocument(String friendUid, BuildContext context, User? user) async {
   try {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // Generate a unique roomId based on userId and friendUid.
-    String roomId = _generateRoomId(userId, friendUid);
+    String roomId = _generateRoomId(user!.uid, friendUid);
 
-    // Check if the room exists by querying the room document directly using the roomId.
     DocumentSnapshot roomSnapshot =
     await firestore.collection('rooms').doc(roomId).get();
 
     if (roomSnapshot.exists) {
-      // If the room already exists, use that room.
       _navigateToChatScreen(roomId, friendUid, context, user);
     } else {
-      // If the room does not exist, create a new room.
       Map<String, dynamic> roomData = {
         'roomId': roomId,
-        'participants': [userId, friendUid],
+        'participants': [user!.uid, friendUid],
       };
 
       await firestore.collection('rooms').doc(roomId).set(roomData);
@@ -179,7 +179,6 @@ void _createOrGetRoomDocument(
 }
 
 String _generateRoomId(String userId, String friendUid) {
-  // Sort the userId and friendUid to create a consistent and unique roomId.
   List<String> sortedIds = [userId, friendUid]..sort();
   return "${sortedIds[0]}_${sortedIds[1]}";
 }
@@ -247,7 +246,7 @@ class FriendCard extends StatelessWidget {
         return Card(
           child: GestureDetector(
             onTap: () {
-              _createOrGetRoomDocument(user!.uid, friendUid, context, user);
+              _createOrGetRoomDocument(friendUid, context, user);
             },
             child: ListTile(
               leading: CircleAvatar(
