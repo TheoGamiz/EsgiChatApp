@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FriendList extends StatefulWidget {
-  const FriendList({Key? key, required this.user}) : super(key: key);
-  final User? user;
+  FriendList() : super();
+  final User user = FirebaseAuth.instance.currentUser!;
 
   @override
   State<FriendList> createState() => _FriendListState();
@@ -12,14 +12,15 @@ class FriendList extends StatefulWidget {
 
 class _FriendListState extends State<FriendList> {
   final CollectionReference usersCollection =
-      FirebaseFirestore.instance.collection('users');
+  FirebaseFirestore.instance.collection('users');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text('Amis'),
-          centerTitle: true,
+        title: Text('Amis'),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: usersCollection.doc(widget.user!.uid).snapshots(),
@@ -52,7 +53,6 @@ class _FriendListState extends State<FriendList> {
                   title: Text(email),
                   trailing: ElevatedButton(
                     onPressed: () async {
-                      await addFriend(widget.user!.uid);
                       // Add the UID to the "amis" array when the button is pressed
                       await addFriend(email);
                       // You can also remove the friend request from the "demandes" array
@@ -86,7 +86,7 @@ class _FriendListState extends State<FriendList> {
 
       print('Friend added successfully.');
     } catch (e) {
-      print('Erreur lors de l\'ajout de l\'ami: $e');
+      print('Error adding friend: $e');
     }
   }
 

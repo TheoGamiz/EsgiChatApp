@@ -4,20 +4,15 @@ import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
-import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
 import '../../chat/screens/chat_screen.dart';
-import '../../test/rooms.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
-  final User? user;
+  final User user = FirebaseAuth.instance.currentUser!;
   final TextEditingController _friendUidController = TextEditingController();
 
-  HomeScreen({required this.user}) : super();
+  HomeScreen() : super();
 
   @override
   Widget build(BuildContext context) {
@@ -25,15 +20,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Messages'),
         centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () {
-              BlocProvider.of<AuthenticationBloc>(context)
-                  .add(AuthenticationLoggedOut());
-            },
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -163,7 +150,7 @@ void _createOrGetRoomDocument(
 
     // Check if the room exists by querying the room document directly using the roomId.
     DocumentSnapshot roomSnapshot =
-        await firestore.collection('rooms').doc(roomId).get();
+    await firestore.collection('rooms').doc(roomId).get();
 
     if (roomSnapshot.exists) {
       // If the room already exists, use that room.
@@ -197,10 +184,8 @@ String _generateRoomId(String userId, String friendUid) {
   return "${sortedIds[0]}_${sortedIds[1]}";
 }
 
-
 void _navigateToChatScreen(
     String roomId, String friendUid, context, User? user) {
-  // Navigate to the ChatPage with the roomId and friendUid.
   Navigator.push(
     context,
     MaterialPageRoute(
@@ -225,14 +210,14 @@ class FriendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
       future:
-          FirebaseFirestore.instance.collection('users').doc(friendUid).get(),
+      FirebaseFirestore.instance.collection('users').doc(friendUid).get(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Card(
             child: GestureDetector(
               onTap: () {},
               child: ListTile(
-                title: Text('Error loading friend'),
+                title: Text('Erreur chargement'),
               ),
             ),
           );
@@ -241,7 +226,7 @@ class FriendCard extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Card(
             child: ListTile(
-              title: Text('Loading...'),
+              title: Text('Chargement...'),
             ),
           );
         }
@@ -250,7 +235,7 @@ class FriendCard extends StatelessWidget {
         if (!friendDoc!.exists) {
           return Card(
             child: ListTile(
-              title: Text('Friend not found'),
+              title: Text('Utilisateur introuvable'),
             ),
           );
         }

@@ -8,16 +8,14 @@ import 'package:line_icons/line_icons.dart';
 import '../home/screens/home_screen.dart';
 
 class NavBar extends StatefulWidget {
-  const NavBar({super.key, this.user});
-  final User? user;
+  //const NavBar({super.key, this.user});
+  //final User? user;
 
   static const routeName = '/navBar';
 
   static void navigateTo(BuildContext context) {
     Navigator.of(context).pushNamed(routeName);
   }
-
-  final User user = FirebaseAuth.instance.currentUser!;
 
   @override
   State<NavBar> createState() => _NavBarState();
@@ -33,9 +31,9 @@ class _NavBarState extends State<NavBar> {
   void initState() {
     super.initState();
     _widgetOptions = <Widget>[
-      HomeScreen(user: widget.user),
-      FriendList(user: widget.user),
-      Profile(user: widget.user),
+      HomeScreen(),
+      FriendList(),
+      Profile(),
     ];
   }
 
@@ -72,7 +70,7 @@ class _NavBarState extends State<NavBar> {
               tabs: [
                 GButton(
                   icon: LineIcons.home,
-                  text: 'Home',
+                  text: 'Messages',
                 ),
                 GButton(
                   icon: LineIcons.userFriends,

@@ -1,7 +1,7 @@
-
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.dart';
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:esgi_chat_app/features/login/screens/login_screen.dart';
+import 'package:esgi_chat_app/features/register/screens/register_screen.dart';
 import 'package:esgi_chat_app/features/repository/user_repository.dart';
 import 'package:esgi_chat_app/features/widgets/navbar.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (context) => UserRepository(
-        //postsDataSource: FirestorePostsDataSource(),
-      ),
+      create: (context) => UserRepository(),
       child: Builder(
         builder: (context) {
           return BlocProvider(
@@ -29,7 +27,7 @@ class MyApp extends StatelessWidget {
                 //"/": (context) => FirebaseAuth.instance.currentUser == null ? LoginScreen() : HomeScreen(),
                 LoginScreen.routeName: (context) => LoginScreen(),
                 NavBar.routeName: (context) => NavBar(),
-                //AddPostScreen.routeName: (context) => AddPostScreen(),
+                RegisterScreen.routeName: (context) => RegisterScreen(),
               },
               //onGenerateRoute: AppRouter.onGenerateRoute,
             ),

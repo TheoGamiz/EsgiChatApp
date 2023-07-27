@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final UserRepository _userRepository;
-  
+  static const routeName = '/register';
 
-  const RegisterScreen({required UserRepository userRepository})
-      : _userRepository = userRepository,
-        super();
+  static void navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
+  const RegisterScreen()  : super();
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -33,7 +34,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
       body: BlocProvider<RegisterBloc>(
-        create: (context) => RegisterBloc(userRepository: widget._userRepository),
+        create: (context) => RegisterBloc(
+          userRepository: context.read<UserRepository>(),
+        ),
         child: Container(
           height: double.infinity,
           decoration: BoxDecoration(

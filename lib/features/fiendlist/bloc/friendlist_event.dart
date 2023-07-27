@@ -1,15 +1,8 @@
 part of 'friendlist_bloc.dart';
 
-abstract class FriendlistEvent {}
+abstract class FriendlistEvent extends Equatable {
+  const FriendlistEvent();
 
-class AddFriendEvent extends FriendlistEvent {
-  final String friendUid;
-
-  AddFriendEvent(this.friendUid);
-}
-
-class RemoveFriendRequestEvent extends FriendlistEvent {
-  final String email;
-
-  RemoveFriendRequestEvent(this.email);
+  @override
+  List<Object> get props => [];
 }

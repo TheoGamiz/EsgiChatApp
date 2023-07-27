@@ -302,7 +302,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         .get();
     final blockedFriends = List<String>.from(userDoc.get('bloque') ?? []);
     if (blockedFriends.contains(widget.userId)) {
-      print('You cannot send a message to this friend as they are blocked.');
+      print('Vous ne pouvez pas envoyer de message à cet ami car il est bloqué.');
       Fluttertoast.showToast(
         msg: 'Cet utilisateur vous a bloqué',
         toastLength: Toast.LENGTH_SHORT,
@@ -313,7 +313,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       return;
     }
     try {
-      print("TRY");
       await firestore
           .collection('rooms')
           .doc(roomId)
@@ -335,23 +334,19 @@ class _ChatWidgetState extends State<ChatWidget> {
     return snapshots
         .map((snapshot) {
           final data = snapshot.data();
-          print("authorId ${data['senderId']}");
-          print("1");
           final authorId = data['senderId'] ?? "";
           final createdAt =
               (data['timestamp'] as Timestamp?)?.millisecondsSinceEpoch;
           final id = snapshot.id;
           final text = data['text'] as String?;
 
-          types.TextMessage msg1 = types.TextMessage.fromJson({
+          types.TextMessage msg = types.TextMessage.fromJson({
             "author": {"id": authorId},
             "createdAt": createdAt,
             "id": id,
-            "text": data["text"]
+            "text": text
           });
-          //types.Message msg = types.Message.fromJson(data);
-
-          return msg1;
+          return msg;
         })
         .where((message) => message != null)
         .toList();

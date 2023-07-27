@@ -1,7 +1,6 @@
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.dart';
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:esgi_chat_app/features/register/screens/register_screen.dart';
-import 'package:esgi_chat_app/features/repository/user_repository.dart';
 import 'package:esgi_chat_app/features/widgets/navbar.dart';
 import '../../widgets/gradient_button.dart';
 import '../bloc/login_bloc.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginForm extends StatefulWidget {
-
   @override
   _LoginFormState createState() => _LoginFormState();
 }
@@ -27,12 +25,9 @@ class _LoginFormState extends State<LoginForm> {
     return state.isFormValid && isPopulated && !state.isSubmitting;
   }
 
-  late LoginBloc _loginBloc;
-
   @override
   void initState() {
     super.initState();
-    _loginBloc = BlocProvider.of<LoginBloc>(context);
     _emailController.addListener(_onEmailChange);
     _passwordController.addListener(_onPasswordChange);
   }
@@ -49,7 +44,7 @@ class _LoginFormState extends State<LoginForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Login Failure'),
+                    Text('Échec de connexion'),
                     Icon(Icons.error),
                   ],
                 ),
@@ -66,7 +61,7 @@ class _LoginFormState extends State<LoginForm> {
                 content: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text('Logging In...'),
+                    Text('Connexion en cours...'),
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
@@ -78,9 +73,6 @@ class _LoginFormState extends State<LoginForm> {
         }
 
         if (state.isSuccess) {
-          /*BlocProvider.of<AuthenticationBloc>(context).add(
-            AuthenticationLoggedIn(),
-          );*/
           context.read<AuthenticationBloc>().add(AuthenticationLoggedIn());
           NavBar.navigateTo(context);
         }
@@ -99,30 +91,28 @@ class _LoginFormState extends State<LoginForm> {
                       labelText: "Email",
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    //autovalidate: true,
                     autocorrect: false,
                     validator: (_) {
-                      return !state.isEmailValid ? 'Invalid Email' : null;
+                      return !state.isEmailValid ? 'Emain incorrect' : null;
                     },
                   ),
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       icon: Icon(Icons.lock),
-                      labelText: "Password",
+                      labelText: "Mot de passe",
                     ),
                     obscureText: true,
-                    //autovalidate: true,
                     autocorrect: false,
                     validator: (_) {
-                      return !state.isPasswordValid ? 'Invalid Password' : null;
+                      return !state.isPasswordValid ? 'Mot de passe incorrect' : null;
                     },
                   ),
                   SizedBox(
                     height: 10,
                   ),
                   GradientButton(
-                    width: 150,
+                    width: 160,
                     height: 45,
                     onPressed: () {
                       if (isButtonEnabled(state)) {
@@ -130,7 +120,7 @@ class _LoginFormState extends State<LoginForm> {
                       }
                     },
                     text: Text(
-                      'LogIn',
+                      'Se connecter',
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -144,18 +134,13 @@ class _LoginFormState extends State<LoginForm> {
                     height: 10,
                   ),
                   GradientButton(
-                    width: 150,
+                    width: 160,
                     height: 45,
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return RegisterScreen(
-                          userRepository: context.read<UserRepository>(),
-                        );
-                      }));
-
+                      RegisterScreen.navigateTo(context);
                     },
                     text: Text(
-                      'Register',
+                      'S\'inscrire',
                       style: TextStyle(
                         color: Colors.white,
                       ),
@@ -182,15 +167,15 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _onEmailChange() {
-    _loginBloc.add(LoginEmailChange(email: _emailController.text));
+    BlocProvider.of<LoginBloc>(context).add(LoginEmailChange(email: _emailController.text));
   }
 
   void _onPasswordChange() {
-    _loginBloc.add(LoginPasswordChanged(password: _passwordController.text));
+    BlocProvider.of<LoginBloc>(context).add(LoginPasswordChanged(password: _passwordController.text));
   }
 
   void _onFormSubmitted() {
-    _loginBloc.add(LoginWithCredentialsPressed(
+    BlocProvider.of<LoginBloc>(context).add(LoginWithCredentialsPressed(
         email: _emailController.text, password: _passwordController.text));
   }
 }
