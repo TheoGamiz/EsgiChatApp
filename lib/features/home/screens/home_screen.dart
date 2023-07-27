@@ -154,20 +154,21 @@ void _createOrGetRoomDocument(
   try {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // First, query the rooms collection to find a room that has both userId and friendUid as participants.
-    final QuerySnapshot querySnapshot = await firestore
-        .collection('rooms')
-        .where('participants', arrayContainsAny: [userId, friendUid]).get();
+    // Generate a unique roomId based on userId and friendUid.
+    String roomId = _generateRoomId(userId, friendUid);
 
-    if (querySnapshot.docs.isNotEmpty) {
-      // If a room already exists with these participants, use that room.
-      final roomId = querySnapshot.docs.first.id;
+    // Check if the room exists by querying the room document directly using the roomId.
+    DocumentSnapshot roomSnapshot =
+        await firestore.collection('rooms').doc(roomId).get();
+
+    if (roomSnapshot.exists) {
+      // If the room already exists, use that room.
       _navigateToChatScreen(roomId, friendUid, context, user);
     } else {
-      // If no room exists, create a new room.
-      String roomId = firestore.collection('rooms').doc().id;
+      // If the room does not exist, create a new room.
       Map<String, dynamic> roomData = {
-        'participants': [userId, friendUid]
+        'roomId': roomId,
+        'participants': [userId, friendUid],
       };
 
       await firestore.collection('rooms').doc(roomId).set(roomData);
@@ -187,6 +188,13 @@ void _createOrGetRoomDocument(
     print('Erreur lors de la création de la room : $e');
   }
 }
+
+String _generateRoomId(String userId, String friendUid) {
+  // Sort the userId and friendUid to create a consistent and unique roomId.
+  List<String> sortedIds = [userId, friendUid]..sort();
+  return "${sortedIds[0]}_${sortedIds[1]}";
+}
+
 
 void _navigateToChatScreen(
     String roomId, String friendUid, context, User? user) {
