@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -10,7 +9,6 @@ import 'package:image_picker/image_picker.dart';
 class Profile extends StatefulWidget {
   const Profile({Key? key, this.user}) : super(key: key);
   final User? user;
-
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -30,8 +28,7 @@ class _ProfileState extends State<Profile> {
       });
     }
      try {
-      final uid = widget.user!
-          .uid; // Replace with the actual user ID or any unique identifier. // The desired name for the file in Firebase Storage.
+      final uid = widget.user!.uid;
       final firebase_storage.Reference storageRef =
           firebase_storage.FirebaseStorage.instance.ref('$uid.png');
 
@@ -42,7 +39,6 @@ class _ProfileState extends State<Profile> {
       print('Image uploaded. Download URL: $downloadURL');
     } catch (e) {
       print('Error uploading image: $e');
-      // Handle any errors that occurred during the image upload process.
     }
   }
 
@@ -51,20 +47,39 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     if (widget.user != null) {
       String token = widget.user!.refreshToken.toString();
-      return Column(
+      return Stack(
         children: [
-          SizedBox(height: 100),
-          
-               CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}.png?alt=media&token=${token}"),
-                ),
-          Text(widget.user!.email!),
-          Text(widget.user!.uid),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _pickImage,
-            child: Text('Upload Image'),
+          Column(
+            children: [
+              SizedBox(height: 100),
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}.png?alt=media&token=${token}"),
+              ),
+              Text(widget.user!.email!),
+              Text(widget.user!.uid),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Upload Image'),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: ElevatedButton(
+              onPressed: () {
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red,
+              ),
+              child: Text(
+                'Se déconnecter',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ),
         ],
       );
@@ -72,4 +87,5 @@ class _ProfileState extends State<Profile> {
       return Text('No user available');
     }
   }
+
 }

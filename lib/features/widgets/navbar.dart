@@ -37,7 +37,7 @@ class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mes Demandes d'Amis"),),
+      //appBar: AppBar(title: Text("Mes Demandes d'Amis"),),
       backgroundColor: Colors.white,
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
