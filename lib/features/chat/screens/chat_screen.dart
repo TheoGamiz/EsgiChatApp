@@ -224,33 +224,45 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _handleSendPressed(types.PartialText message) async {
-    final textMessage = types.TextMessage(
-      author: _user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: const Uuid().v4(),
-      text: message.text,
-    );
+    final blockedFriendsRef =
+        FirebaseFirestore.instance.collection('users').doc(widget.userId);
 
-    final roomId = widget.roomId;
+    final blockedFriendsSnap = await blockedFriendsRef.get();
+    final blockedFriends = List.from(blockedFriendsSnap['bloque'] ?? []);
 
-    // Save the message to the room's "messages" collection in Firestore
-    try {
-      final FirebaseFirestore firestore = FirebaseFirestore.instance;
-      await firestore
-          .collection('rooms')
-          .doc(roomId)
-          .collection('messages')
-          .add({
-        'text': message.text,
-        'senderId': _user.id,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Erreur lors de l\'envoi du message : $e');
+    if (!blockedFriends.contains(widget.friendUid)) {
+      final textMessage = types.TextMessage(
+        author: _user,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        id: const Uuid().v4(),
+        text: message.text,
+      );
+
+      final roomId = widget.roomId;
+
+      // Save the message to the room's "messages" collection in Firestore
+      try {
+        final FirebaseFirestore firestore = FirebaseFirestore.instance;
+        await firestore
+            .collection('rooms')
+            .doc(roomId)
+            .collection('messages')
+            .add({
+          'text': message.text,
+          'senderId': _user.id,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        print('Erreur lors de l\'envoi du message : $e');
+      }
+
+      _addMessage(textMessage);
+    } else {
+      print('Le message n\'a pas été envoyé car l\'utilisateur est bloqué.');
+      // You can display a message to the user indicating that the message was not sent due to blocking.
     }
-
-    _addMessage(textMessage);
   }
+
 
   List<types.Message> convertToMessagesList(
       List<QueryDocumentSnapshot<Map<String, dynamic>>> snapshots) {
@@ -274,18 +286,13 @@ class _ChatWidgetState extends State<ChatWidget> {
           //types.Message msg = types.Message.fromJson(data);
 
           return msg1;
-          /*types.Message(
-            author: types.User.fromJson(authorId as Map<String, dynamic>),
-            createdAt: createdAt,
-            id: id,
-            type: types.MessageType.text,*/
+        
         })
         .where((message) => message != null)
         .toList();
   }
 
   void _loadMessages(String roomId) {
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo");
 
     FirebaseFirestore.instance
         .collection('rooms')
@@ -304,10 +311,8 @@ class _ChatWidgetState extends State<ChatWidget> {
 
       final messages = snapshot.docs.toList();
 
-      print("EEEEEEEEEEEEEEEEEEEEEE" + messages.isEmpty.toString());
       setState(() {
         _messages = convertToMessagesList(messages);
-        print("MESSSAAAAAGES:" + messages.length.toString());
       });
     }, onError: (error) {
       print("Error fetching messages: $error");
