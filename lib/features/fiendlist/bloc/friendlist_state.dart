@@ -1,10 +1,37 @@
 part of 'friendlist_bloc.dart';
 
-abstract class FriendlistState extends Equatable {
-  const FriendlistState();
-  
-  @override
-  List<Object> get props => [];
+enum FriendlistStatus {
+  initial,
+  fetchingFriends,
+  addingFriend,
+  removingFriend,
+  fetchedFriends,
+  addedFriend,
+  removedFriend,
+  errorFetchingFriends,
+  errorAddingFriend,
+  errorRemovingFriend,
 }
 
-class FriendlistInitial extends FriendlistState {}
+class FriendlistState extends Equatable {
+  final FriendlistStatus status;
+  final List<User> friends;
+
+  const FriendlistState({
+    this.status = FriendlistStatus.initial,
+    this.friends = const <User>[],
+  });
+
+  FriendlistState copyWith({
+    FriendlistStatus? status,
+    List<User>? friends,
+  }) {
+    return FriendlistState(
+      status: status ?? this.status,
+      friends: friends ?? this.friends,
+    );
+  }
+
+  @override
+  List<Object?> get props => [status, friends];
+}

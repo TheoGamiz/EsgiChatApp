@@ -49,9 +49,7 @@ class _FriendListState extends State<FriendList> {
                   title: Text(email),
                   trailing: ElevatedButton(
                     onPressed: () async {
-                      // Add the UID to the "amis" array when the button is pressed
                       await addFriend(widget.user!.uid);
-                      // You can also remove the friend request from the "demandes" array
                       await removeFriendRequest(email);
                     },
                     child: Text('Ajouter'),
