@@ -45,19 +45,39 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     if (widget.user != null) {
       String token = widget.user!.refreshToken.toString();
-      return Column(
+      return Stack(
         children: [
-          SizedBox(height: 100),
-               CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}.png?alt=media&token=${token}"),
-                ),
-          Text(widget.user!.email!),
-          Text(widget.user!.uid),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _pickImage,
-            child: Text('Upload Image'),
+          Column(
+            children: [
+              SizedBox(height: 100),
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: NetworkImage("https://firebasestorage.googleapis.com/v0/b/chat-app-4c9df.appspot.com/o/${widget.user!.uid}.png?alt=media&token=${token}"),
+              ),
+              Text(widget.user!.email!),
+              Text(widget.user!.uid),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Upload Image'),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: ElevatedButton(
+              onPressed: () {
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red,
+              ),
+              child: Text(
+                'Se déconnecter',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ),
         ],
       );
@@ -65,4 +85,5 @@ class _ProfileState extends State<Profile> {
       return Text('No user available');
     }
   }
+
 }

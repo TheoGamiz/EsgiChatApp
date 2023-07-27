@@ -17,7 +17,10 @@ class _FriendListState extends State<FriendList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Friend List')),
+      appBar: AppBar(
+          title: Text('Amis'),
+          centerTitle: true,
+      ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: usersCollection.doc(widget.user!.uid).snapshots(),
         builder: (context, snapshot) {

@@ -1,59 +1,60 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:meta/meta.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import '../../repository/chat_repository.dart';
+import 'chat_event.dart' as chatEvent;
+import 'chat_state.dart' as chatState;
 
-part 'chat_event.dart';
-part 'chat_state.dart';
+class ChatBloc extends Bloc<chatEvent.ChatEvent, chatState.ChatState> {
+  final String friendUid;
+  final String roomId;
+  final String userId;
+  final ChatRepository repository;
 
-class ChatBloc extends Bloc<ChatEvent, ChatState> {
-  ChatBloc() : super(ChatState());
+  ChatBloc({
+    required this.friendUid,
+    required this.roomId,
+    required this.userId,
+    required this.repository,
+  }) : super(chatState.ChatInitial());
 
   @override
-  Stream<ChatState> mapEventToState(
-      ChatEvent event,
-      ) async* {
-    if (event is LoadChat) {
-      yield* _mapLoadChatToState(event);
+  Stream<chatState.ChatState> mapEventToState(
+      chatEvent.ChatEvent event) async* {
+    if (event is chatEvent.LoadMessages) {
+      yield* _mapLoadMessagesToState();
+    } else if (event is chatEvent.SendMessage) {
+      yield* _mapSendMessageToState(event);
+    } else if (event is chatEvent.ToggleBlockedState) {
+      yield* _mapToggleBlockedStateToState();
     }
-    // Handle other events if needed
   }
 
-  Stream<ChatState> _mapLoadChatToState(LoadChat event) async* {
-    yield state.copyWith(status: ChatStatus.loading);
+  Stream<chatState.ChatState> _mapLoadMessagesToState() async* {
     try {
-      final messages = await _loadChatMessages(event.roomId);
-      if(messages.isEmpty){
-        yield state.copyWith(status: ChatStatus.error, error: "Aucun message");
-      } else {
-        yield state.copyWith(status: ChatStatus.success);
-      }
+      final messages = await repository.loadMessages(roomId);
+      yield chatState.ChatMessagesLoaded(messages: messages);
     } catch (e) {
-      yield state.copyWith(status: ChatStatus.error);  //ChatState(message: e.toString());
+      yield chatState.ChatError(message: 'Failed to load messages: $e');
     }
   }
 
-  // Replace this method with actual logic to load chat messages from your data source
-  Future<List<types.Message>> _loadChatMessages(String roomId) async {
-    await Future.delayed(Duration(seconds: 2)); // Simulate loading delay
+  Stream<chatState.ChatState> _mapSendMessageToState(
+      chatEvent.SendMessage event) async* {
+    try {
+      await repository.sendMessage(roomId, userId, event.message);
+      yield chatState.ChatMessageSent();
+    } catch (e) {
+      yield chatState.ChatError(message: 'Failed to send message: $e');
+    }
+  }
 
-    // Return some dummy data for testing
-    return [
-      types.TextMessage(
-        author: types.User(id: 'user1'),
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: '1',
-        text: 'Hello!',
-      ),
-      types.TextMessage(
-        author: types.User(id: 'user2'),
-        createdAt: DateTime.now().add(Duration(minutes: 1)).millisecondsSinceEpoch,
-        id: '2',
-        text: 'Hi!',
-      ),
-      // Add more messages as needed
-    ];
+  Stream<chatState.ChatState> _mapToggleBlockedStateToState() async* {
+    try {
+      final isBlocked = await repository.toggleBlockedState(roomId, userId);
+      yield chatState.ChatBlockedStateUpdated(isBlocked: isBlocked);
+    } catch (e) {
+      yield chatState.ChatError(message: 'Failed to update blocked state: $e');
+    }
   }
 }

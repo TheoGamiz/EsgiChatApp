@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -14,7 +15,7 @@ import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   final String friendUid;
   final String roomId;
   final String userId;
@@ -26,19 +27,78 @@ class ChatPage extends StatelessWidget {
   }) : super();
 
   @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  bool isBlocked = false;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Room ID: $roomId'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.block,
+              color: isBlocked ? Colors.red : null,
+            ),
+            onPressed: () {
+              _toggleBlockedState(context, widget.roomId, widget.userId);
+            },
+          ),
+        ],
       ),
       body: ChatWidget(
-        friendUid: friendUid,
-        roomId: roomId,
-        userId: userId,
+        friendUid: widget.friendUid,
+        roomId: widget.roomId,
+        userId: widget.userId,
       ),
     );
   }
+
+  void _toggleBlockedState(
+      BuildContext context, String roomId, String userId) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      List<String> noNotifList = List<String>.from(userDoc.get('NoNotif'));
+
+      if (isBlocked) {
+        // Supprimer le roomId de la liste
+        noNotifList.remove(roomId);
+      } else {
+        // Ajouter le roomId à la liste
+        noNotifList.add(roomId);
+      }
+
+      // Mettre à jour le document avec la liste modifiée
+      await firestore.collection('users').doc(userId).update({
+        'NoNotif': noNotifList,
+      });
+
+      // Inverser l'état du blocage pour le prochain appui
+      setState(() {
+        isBlocked = !isBlocked;
+      });
+
+      // Afficher une notification de succès (facultatif)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: isBlocked
+            ? Text('Les notifications de la room ont été bloquées.')
+            : Text('Les notifiations de la room a été débloquées.'),
+      ));
+    } catch (e) {
+      // Gérer les erreurs (facultatif)
+      print('Erreur lors de la mise à jour du blocage du room : $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Erreur lors de la mise à jour du blocage du room.'),
+      ));
+    }
+  }
 }
+
 
 class ChatWidget extends StatefulWidget {
   final String friendUid;
@@ -54,6 +114,8 @@ class ChatWidget extends StatefulWidget {
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
 }
+
+
 
 class _ChatWidgetState extends State<ChatWidget> {
   List<types.Message> _messages = [];
@@ -233,9 +295,25 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     final roomId = widget.roomId;
 
-    // Save the message to the room's "messages" collection in Firestore
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final userDoc = await firestore
+        .collection('users')
+        .doc(widget.friendUid.toString())
+        .get();
+    final blockedFriends = List<String>.from(userDoc.get('bloque') ?? []);
+    if (blockedFriends.contains(widget.userId)) {
+      print('You cannot send a message to this friend as they are blocked.');
+      Fluttertoast.showToast(
+        msg: 'Cet utilisateur vous a bloqué',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
     try {
-      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      print("TRY");
       await firestore
           .collection('rooms')
           .doc(roomId)
@@ -246,7 +324,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Erreur lors de l\'envoi du message : $e');
+      print("Erreur lors de l'envoi du message : $e");
     }
 
     _addMessage(textMessage);
@@ -274,19 +352,12 @@ class _ChatWidgetState extends State<ChatWidget> {
           //types.Message msg = types.Message.fromJson(data);
 
           return msg1;
-          /*types.Message(
-            author: types.User.fromJson(authorId as Map<String, dynamic>),
-            createdAt: createdAt,
-            id: id,
-            type: types.MessageType.text,*/
         })
         .where((message) => message != null)
         .toList();
   }
 
   void _loadMessages(String roomId) {
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo");
-
     FirebaseFirestore.instance
         .collection('rooms')
         .doc(roomId)
@@ -304,10 +375,8 @@ class _ChatWidgetState extends State<ChatWidget> {
 
       final messages = snapshot.docs.toList();
 
-      print("EEEEEEEEEEEEEEEEEEEEEE" + messages.isEmpty.toString());
       setState(() {
         _messages = convertToMessagesList(messages);
-        print("MESSSAAAAAGES:" + messages.length.toString());
       });
     }, onError: (error) {
       print("Error fetching messages: $error");

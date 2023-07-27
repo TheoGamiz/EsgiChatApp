@@ -1,7 +1,6 @@
 import 'package:esgi_chat_app/features/fiendlist/screen/friendlist_screen.dart';
 import 'package:esgi_chat_app/features/profile/screen/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -9,6 +8,9 @@ import 'package:line_icons/line_icons.dart';
 import '../home/screens/home_screen.dart';
 
 class NavBar extends StatefulWidget {
+  const NavBar({super.key, this.user});
+  final User? user;
+
   static const routeName = '/navBar';
 
   static void navigateTo(BuildContext context) {
@@ -26,7 +28,7 @@ class _NavBarState extends State<NavBar> {
   static TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.w600);
   late List<Widget> _widgetOptions;
-
+  
   @override
   void initState() {
     super.initState();

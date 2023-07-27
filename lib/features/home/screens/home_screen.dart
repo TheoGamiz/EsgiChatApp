@@ -4,6 +4,10 @@ import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_event.dart';
+import 'package:esgi_chat_app/blocs/authentication_bloc/authentication_state.dart';
 
 import '../../chat/screens/chat_screen.dart';
 import '../../test/rooms.dart';
@@ -19,7 +23,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text('Messages'),
+        centerTitle: true,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.exit_to_app),
@@ -70,7 +75,11 @@ class HomeScreen extends StatelessWidget {
                   itemCount: friends.length,
                   itemBuilder: (context, index) {
                     final friendUid = friends[index] as String;
-                    return FriendCard(friendUid: friendUid, user: user);
+                    return FriendCard(
+                      friendUid: friendUid,
+                      user: user,
+                      blockedFriends: List.from(userDoc['bloque']),
+                    );
                   },
                 );
               },
@@ -144,24 +153,26 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-void _createOrGetRoomDocument(String userId, String friendUid, BuildContext context, User? user) async {
+void _createOrGetRoomDocument(
+    String userId, String friendUid, BuildContext context, User? user) async {
   try {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // First, query the rooms collection to find a room that has both userId and friendUid as participants.
-    final QuerySnapshot querySnapshot = await firestore
-        .collection('rooms')
-        .where('participants', arrayContainsAny: [userId, friendUid]).get();
+    // Generate a unique roomId based on userId and friendUid.
+    String roomId = _generateRoomId(userId, friendUid);
 
-    if (querySnapshot.docs.isNotEmpty) {
-      // If a room already exists with these participants, use that room.
-      final roomId = querySnapshot.docs.first.id;
+    // Check if the room exists by querying the room document directly using the roomId.
+    DocumentSnapshot roomSnapshot =
+        await firestore.collection('rooms').doc(roomId).get();
+
+    if (roomSnapshot.exists) {
+      // If the room already exists, use that room.
       _navigateToChatScreen(roomId, friendUid, context, user);
     } else {
-      // If no room exists, create a new room.
-      String roomId = firestore.collection('rooms').doc().id;
+      // If the room does not exist, create a new room.
       Map<String, dynamic> roomData = {
-        'participants': [userId, friendUid]
+        'roomId': roomId,
+        'participants': [userId, friendUid],
       };
 
       await firestore.collection('rooms').doc(roomId).set(roomData);
@@ -170,8 +181,6 @@ void _createOrGetRoomDocument(String userId, String friendUid, BuildContext cont
           .doc(roomId)
           .collection('messages')
           .add({
-        'text': 'Message de bienvenue',
-        'sender': 'système',
         'timestamp': FieldValue.serverTimestamp(),
       });
 
@@ -182,15 +191,23 @@ void _createOrGetRoomDocument(String userId, String friendUid, BuildContext cont
   }
 }
 
+String _generateRoomId(String userId, String friendUid) {
+  // Sort the userId and friendUid to create a consistent and unique roomId.
+  List<String> sortedIds = [userId, friendUid]..sort();
+  return "${sortedIds[0]}_${sortedIds[1]}";
+}
 
-void _navigateToChatScreen(String roomId, String friendUid, context,User? user) {
+
+void _navigateToChatScreen(
+    String roomId, String friendUid, context, User? user) {
   // Navigate to the ChatPage with the roomId and friendUid.
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => ChatPage(
         roomId: roomId,
-        friendUid: friendUid, userId: user!.uid,
+        friendUid: friendUid,
+        userId: user!.uid,
       ),
     ),
   );
@@ -199,8 +216,10 @@ void _navigateToChatScreen(String roomId, String friendUid, context,User? user) 
 class FriendCard extends StatelessWidget {
   final String friendUid;
   final User? user;
+  final List<String> blockedFriends;
 
-  FriendCard({required this.friendUid, this.user}) : super();
+  FriendCard({required this.friendUid, this.user, required this.blockedFriends})
+      : super();
 
   @override
   Widget build(BuildContext context) {
@@ -211,9 +230,7 @@ class FriendCard extends StatelessWidget {
         if (snapshot.hasError) {
           return Card(
             child: GestureDetector(
-              onTap: () {
-              
-              },
+              onTap: () {},
               child: ListTile(
                 title: Text('Error loading friend'),
               ),
@@ -246,8 +263,6 @@ class FriendCard extends StatelessWidget {
           child: GestureDetector(
             onTap: () {
               _createOrGetRoomDocument(user!.uid, friendUid, context, user);
-
-             
             },
             child: ListTile(
               leading: CircleAvatar(
@@ -256,6 +271,31 @@ class FriendCard extends StatelessWidget {
               ),
               title: Text(friendEmail),
               // Display any other friend information here, such as name, profile picture, etc.
+              trailing: IconButton(
+                  icon: Icon(Icons.block),
+                  color: blockedFriends.contains(friendUid) ? Colors.red : null,
+                  onPressed: () async {
+                    final FirebaseFirestore firestore =
+                        FirebaseFirestore.instance;
+
+                    if (blockedFriends.contains(friendUid)) {
+                      // If the friend is already blocked, remove them from the 'bloque' array.
+                      await firestore
+                          .collection('users')
+                          .doc(user?.uid)
+                          .update({
+                        'bloque': FieldValue.arrayRemove([friendUid]),
+                      });
+                    } else {
+                      // If the friend is not blocked, add them to the 'bloque' array.
+                      await firestore
+                          .collection('users')
+                          .doc(user?.uid)
+                          .update({
+                        'bloque': FieldValue.arrayUnion([friendUid]),
+                      });
+                    }
+                  }),
             ),
           ),
         );
