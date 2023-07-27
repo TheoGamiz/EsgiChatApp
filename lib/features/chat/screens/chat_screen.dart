@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -233,9 +234,28 @@ class _ChatWidgetState extends State<ChatWidget> {
 
     final roomId = widget.roomId;
 
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final userDoc = await firestore
+        .collection('users')
+        .doc(widget.friendUid.toString())
+        .get();
+    final blockedFriends = List<String>.from(userDoc.get('bloque') ?? []);
+    if (blockedFriends.contains(widget.userId)) {
+      // Friend is blocked, don't send the message
+      print('You cannot send a message to this friend as they are blocked.');
+      Fluttertoast.showToast(
+        msg: 'Cet utilisateur vous a bloqué',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
     // Save the message to the room's "messages" collection in Firestore
     try {
-      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      print("TRY");
       await firestore
           .collection('rooms')
           .doc(roomId)
@@ -246,7 +266,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Erreur lors de l\'envoi du message : $e');
+      print("Erreur lors de l'envoi du message : $e");
     }
 
     _addMessage(textMessage);
@@ -274,13 +294,12 @@ class _ChatWidgetState extends State<ChatWidget> {
           //types.Message msg = types.Message.fromJson(data);
 
           return msg1;
-        
         })
         .where((message) => message != null)
         .toList();
   }
 
- void _loadMessages(String roomId) {
+  void _loadMessages(String roomId) {
     FirebaseFirestore.instance
         .collection('rooms')
         .doc(roomId)
@@ -308,7 +327,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) => Scaffold(

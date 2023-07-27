@@ -177,8 +177,6 @@ void _createOrGetRoomDocument(
           .doc(roomId)
           .collection('messages')
           .add({
-        'text': 'Message de bienvenue',
-        'sender': 'système',
         'timestamp': FieldValue.serverTimestamp(),
       });
 
