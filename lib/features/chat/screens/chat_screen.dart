@@ -15,7 +15,7 @@ import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   final String friendUid;
   final String roomId;
   final String userId;
@@ -27,19 +27,78 @@ class ChatPage extends StatelessWidget {
   }) : super();
 
   @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  bool isBlocked = false;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Room ID: $roomId'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.block,
+              color: isBlocked ? Colors.red : null,
+            ),
+            onPressed: () {
+              _toggleBlockedState(context, widget.roomId, widget.userId);
+            },
+          ),
+        ],
       ),
       body: ChatWidget(
-        friendUid: friendUid,
-        roomId: roomId,
-        userId: userId,
+        friendUid: widget.friendUid,
+        roomId: widget.roomId,
+        userId: widget.userId,
       ),
     );
   }
+
+  void _toggleBlockedState(
+      BuildContext context, String roomId, String userId) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      List<String> noNotifList = List<String>.from(userDoc.get('NoNotif'));
+
+      if (isBlocked) {
+        // Supprimer le roomId de la liste
+        noNotifList.remove(roomId);
+      } else {
+        // Ajouter le roomId à la liste
+        noNotifList.add(roomId);
+      }
+
+      // Mettre à jour le document avec la liste modifiée
+      await firestore.collection('users').doc(userId).update({
+        'NoNotif': noNotifList,
+      });
+
+      // Inverser l'état du blocage pour le prochain appui
+      setState(() {
+        isBlocked = !isBlocked;
+      });
+
+      // Afficher une notification de succès (facultatif)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: isBlocked
+            ? Text('Les notifications de la room ont été bloquées.')
+            : Text('Les notifiations de la room a été débloquées.'),
+      ));
+    } catch (e) {
+      // Gérer les erreurs (facultatif)
+      print('Erreur lors de la mise à jour du blocage du room : $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Erreur lors de la mise à jour du blocage du room.'),
+      ));
+    }
+  }
 }
+
 
 class ChatWidget extends StatefulWidget {
   final String friendUid;
@@ -55,6 +114,8 @@ class ChatWidget extends StatefulWidget {
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
 }
+
+
 
 class _ChatWidgetState extends State<ChatWidget> {
   List<types.Message> _messages = [];
@@ -241,7 +302,6 @@ class _ChatWidgetState extends State<ChatWidget> {
         .get();
     final blockedFriends = List<String>.from(userDoc.get('bloque') ?? []);
     if (blockedFriends.contains(widget.userId)) {
-      // Friend is blocked, don't send the message
       print('You cannot send a message to this friend as they are blocked.');
       Fluttertoast.showToast(
         msg: 'Cet utilisateur vous a bloqué',
@@ -252,8 +312,6 @@ class _ChatWidgetState extends State<ChatWidget> {
       );
       return;
     }
-
-    // Save the message to the room's "messages" collection in Firestore
     try {
       print("TRY");
       await firestore

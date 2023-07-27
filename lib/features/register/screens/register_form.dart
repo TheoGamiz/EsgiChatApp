@@ -188,8 +188,8 @@ class _RegisterFormState extends State<RegisterForm> {
             'demandes': [],
             'amis' : [],
             'token': token,
-            'bloque':[]// Facultatif : stocker l'heure de création
-          // Ajouter toute autre information que vous souhaitez stocker
+            'bloque':[],
+            'NoNotif': []
         };
 
         await FirebaseFirestore.instance
