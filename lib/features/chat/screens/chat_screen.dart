@@ -1,3 +1,4 @@
+import 'package:esgi_chat_app/features/models/message.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -9,7 +10,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/Uuid.dart';
+import 'package:uuid/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -64,7 +65,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     _user = types.User(
       id: widget.userId,
     );
-    _loadMessages();
+    _loadMessages(widget.roomId);
   }
 
   void _addMessage(types.Message message) {
@@ -251,8 +252,40 @@ class _ChatWidgetState extends State<ChatWidget> {
     _addMessage(textMessage);
   }
 
-  void _loadMessages() {
-    final roomId = widget.roomId;
+  List<types.Message> convertToMessagesList(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> snapshots) {
+    return snapshots
+        .map((snapshot) {
+          final data = snapshot.data();
+          print("authorId ${data['senderId']}");
+          print("1");
+          final authorId = data['senderId'] ?? "";
+          final createdAt =
+              (data['timestamp'] as Timestamp?)?.millisecondsSinceEpoch;
+          final id = snapshot.id;
+          final text = data['text'] as String?;
+
+          types.TextMessage msg1 = types.TextMessage.fromJson({
+            "author": {"id": authorId},
+            "createdAt": createdAt,
+            "id": id,
+            "text": data["text"]
+          });
+          //types.Message msg = types.Message.fromJson(data);
+
+          return msg1;
+          /*types.Message(
+            author: types.User.fromJson(authorId as Map<String, dynamic>),
+            createdAt: createdAt,
+            id: id,
+            type: types.MessageType.text,*/
+        })
+        .where((message) => message != null)
+        .toList();
+  }
+
+  void _loadMessages(String roomId) {
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo");
 
     FirebaseFirestore.instance
         .collection('rooms')
@@ -261,18 +294,25 @@ class _ChatWidgetState extends State<ChatWidget> {
         .orderBy('timestamp', descending: true)
         .snapshots()
         .listen((snapshot) {
-      final messages = snapshot.docs
-          .map((doc) => types.TextMessage(
-                author: types.User(id: doc['senderId']),
-                createdAt:
-                    (doc['timestamp'] as Timestamp).millisecondsSinceEpoch,
-                id: doc.id,
-                text: doc['text'],
-              ))
-          .toList();
+      if (snapshot == null || snapshot.docs.isEmpty) {
+        print("No messages found in the collection.");
+        setState(() {
+          _messages = [];
+        });
+        return;
+      }
 
+      final messages = snapshot.docs.toList();
+
+      print("EEEEEEEEEEEEEEEEEEEEEE" + messages.isEmpty.toString());
       setState(() {
-        _messages = messages;
+        _messages = convertToMessagesList(messages);
+        print("MESSSAAAAAGES:" + messages.length.toString());
+      });
+    }, onError: (error) {
+      print("Error fetching messages: $error");
+      setState(() {
+        _messages = [];
       });
     });
   }
