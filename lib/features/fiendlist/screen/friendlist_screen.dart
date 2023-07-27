@@ -50,6 +50,9 @@ class _FriendListState extends State<FriendList> {
                   trailing: ElevatedButton(
                     onPressed: () async {
                       await addFriend(widget.user!.uid);
+                      // Add the UID to the "amis" array when the button is pressed
+                      await addFriend(email);
+                      // You can also remove the friend request from the "demandes" array
                       await removeFriendRequest(email);
                     },
                     child: Text('Ajouter'),
@@ -65,10 +68,20 @@ class _FriendListState extends State<FriendList> {
 
   Future<void> addFriend(String friendUid) async {
     try {
+      // Add the ID of the current user (widget.user!.uid) to the "amis" array of the requester (friendUid)
+      await usersCollection.doc(friendUid).update({
+        'amis': FieldValue.arrayUnion([widget.user!.uid]),
+      });
+
+      // Add the ID of the requester (friendUid) to the "amis" array of the current user (widget.user!.uid)
       await usersCollection.doc(widget.user!.uid).update({
         'amis': FieldValue.arrayUnion([friendUid]),
       });
-      print('Ami ajouté avec succès.');
+
+      // You can also remove the friend request from the "demandes" array if you wish
+      await removeFriendRequest(friendUid);
+
+      print('Friend added successfully.');
     } catch (e) {
       print('Erreur lors de l\'ajout de l\'ami: $e');
     }

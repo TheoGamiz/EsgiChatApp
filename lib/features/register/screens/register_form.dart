@@ -2,6 +2,7 @@ import 'package:esgi_chat_app/features/authentication_bloc/authentication_bloc.d
 import 'package:esgi_chat_app/features/authentication_bloc/authentication_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/register_bloc.dart';
@@ -173,6 +174,11 @@ class _RegisterFormState extends State<RegisterForm> {
 
         // Récupérer l'identifiant de l'utilisateur depuis userCredential
         String userId = userCredential.user!.uid;
+         final _firebaseMessaging = FirebaseMessaging.instance;
+
+  
+        await _firebaseMessaging.requestPermission();
+        String? token = await _firebaseMessaging.getToken();
 
         // Créer une carte avec les informations de l'utilisateur
         Map<String, dynamic> userInfo = {
@@ -180,7 +186,8 @@ class _RegisterFormState extends State<RegisterForm> {
           'createdAt':
               DateTime.now(),
             'demandes': [],
-            'amis' : []// Facultatif : stocker l'heure de création
+            'amis' : [],
+            'token': token// Facultatif : stocker l'heure de création
           // Ajouter toute autre information que vous souhaitez stocker
         };
 

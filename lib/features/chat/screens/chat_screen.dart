@@ -1,10 +1,7 @@
+import 'package:esgi_chat_app/features/models/message.dart';
 import 'package:flutter/material.dart';
-
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:http/http.dart' as http;
@@ -14,39 +11,61 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatPage extends StatelessWidget {
   final String friendUid;
+  final String roomId;
+  final String userId;
 
-  ChatPage({required this.friendUid}) : super();
+  ChatPage({
+    required this.friendUid,
+    required this.roomId,
+    required this.userId,
+  }) : super();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ChatWidget(friendUid: friendUid), // Pass friendUid to ChatWidget
+      appBar: AppBar(
+        title: Text('Room ID: $roomId'),
+      ),
+      body: ChatWidget(
+        friendUid: friendUid,
+        roomId: roomId,
+        userId: userId,
+      ),
     );
   }
 }
+
 class ChatWidget extends StatefulWidget {
   final String friendUid;
+  final String roomId;
+  final String userId;
 
-  const ChatWidget({required this.friendUid}) : super();
+  const ChatWidget({
+    required this.friendUid,
+    required this.roomId,
+    required this.userId,
+  }) : super();
 
   @override
   State<ChatWidget> createState() => _ChatWidgetState();
 }
 
 class _ChatWidgetState extends State<ChatWidget> {
-  
   List<types.Message> _messages = [];
-  final _user = const types.User(
-    id: '82091008-a484-4a89-ae75-a22bf8d6f3ac',
-  );
+  late final types.User _user;
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
+    _user = types.User(
+      id: widget.userId,
+    );
+    _loadMessages(widget.roomId);
   }
 
   void _addMessage(types.Message message) {
@@ -108,10 +127,11 @@ class _ChatWidgetState extends State<ChatWidget> {
         author: _user,
         createdAt: DateTime.now().millisecondsSinceEpoch,
         id: const Uuid().v4(),
-        mimeType: lookupMimeType(result.files.single.path ?? "") ?? 'application/*',
+        mimeType:
+            lookupMimeType(result.files.single.path ?? '') ?? 'application/*',
         name: result.files.single.name,
         size: result.files.single.size,
-        uri: result.files.single.path ?? "",
+        uri: result.files.single.path ?? '',
       );
 
       _addMessage(message);
@@ -151,9 +171,9 @@ class _ChatWidgetState extends State<ChatWidget> {
       if (message.uri.startsWith('http')) {
         try {
           final index =
-          _messages.indexWhere((element) => element.id == message.id);
+              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-          (_messages[index] as types.FileMessage).copyWith(
+              (_messages[index] as types.FileMessage).copyWith(
             isLoading: true,
           );
 
@@ -173,9 +193,9 @@ class _ChatWidgetState extends State<ChatWidget> {
           }
         } finally {
           final index =
-          _messages.indexWhere((element) => element.id == message.id);
+              _messages.indexWhere((element) => element.id == message.id);
           final updatedMessage =
-          (_messages[index] as types.FileMessage).copyWith(
+              (_messages[index] as types.FileMessage).copyWith(
             isLoading: null,
           );
 
@@ -190,9 +210,9 @@ class _ChatWidgetState extends State<ChatWidget> {
   }
 
   void _handlePreviewDataFetched(
-      types.TextMessage message,
-      types.PreviewData previewData,
-      ) {
+    types.TextMessage message,
+    types.PreviewData previewData,
+  ) {
     final index = _messages.indexWhere((element) => element.id == message.id);
     final updatedMessage = (_messages[index] as types.TextMessage).copyWith(
       previewData: previewData,
@@ -203,7 +223,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     });
   }
 
-  void _handleSendPressed(types.PartialText message) {
+  void _handleSendPressed(types.PartialText message) async {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -211,38 +231,103 @@ class _ChatWidgetState extends State<ChatWidget> {
       text: message.text,
     );
 
+    final roomId = widget.roomId;
+
+    // Save the message to the room's "messages" collection in Firestore
+    try {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      await firestore
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .add({
+        'text': message.text,
+        'senderId': _user.id,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Erreur lors de l\'envoi du message : $e');
+    }
+
     _addMessage(textMessage);
   }
 
-  void _loadMessages() async {
-    final friendUid = widget.friendUid;
+  List<types.Message> convertToMessagesList(
+      List<QueryDocumentSnapshot<Map<String, dynamic>>> snapshots) {
+    return snapshots
+        .map((snapshot) {
+          final data = snapshot.data();
+          print("authorId ${data['senderId']}");
+          print("1");
+          final authorId = data['senderId'] ?? "";
+          final createdAt =
+              (data['timestamp'] as Timestamp?)?.millisecondsSinceEpoch;
+          final id = snapshot.id;
+          final text = data['text'] as String?;
 
-    final response = await rootBundle.loadString('assets/messages.json');
-    final messages = (jsonDecode(response) as List)
-        .map((e) => types.Message.fromJson(e as Map<String, dynamic>))
+          types.TextMessage msg1 = types.TextMessage.fromJson({
+            "author": {"id": authorId},
+            "createdAt": createdAt,
+            "id": id,
+            "text": data["text"]
+          });
+          //types.Message msg = types.Message.fromJson(data);
+
+          return msg1;
+          /*types.Message(
+            author: types.User.fromJson(authorId as Map<String, dynamic>),
+            createdAt: createdAt,
+            id: id,
+            type: types.MessageType.text,*/
+        })
+        .where((message) => message != null)
         .toList();
+  }
 
-    setState(() {
-      _messages = messages.where((message) {
-        // Filter messages to show only those exchanged between the current user and the friend
-        return (message.author.id == _user.id &&
-                message.author.id == friendUid) ||
-            (message.author.id == friendUid && message.author.id == _user.id);
-      }).toList();
+  void _loadMessages(String roomId) {
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo");
+
+    FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot == null || snapshot.docs.isEmpty) {
+        print("No messages found in the collection.");
+        setState(() {
+          _messages = [];
+        });
+        return;
+      }
+
+      final messages = snapshot.docs.toList();
+
+      print("EEEEEEEEEEEEEEEEEEEEEE" + messages.isEmpty.toString());
+      setState(() {
+        _messages = convertToMessagesList(messages);
+        print("MESSSAAAAAGES:" + messages.length.toString());
+      });
+    }, onError: (error) {
+      print("Error fetching messages: $error");
+      setState(() {
+        _messages = [];
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Chat(
-      messages: _messages,
-      onAttachmentPressed: _handleAttachmentPressed,
-      onMessageTap: _handleMessageTap,
-      onPreviewDataFetched: _handlePreviewDataFetched,
-      onSendPressed: _handleSendPressed,
-      showUserAvatars: true,
-      showUserNames: true,
-      user: _user,
-    ),
-  );
+        body: Chat(
+          messages: _messages,
+          onAttachmentPressed: _handleAttachmentPressed,
+          onMessageTap: _handleMessageTap,
+          onPreviewDataFetched: _handlePreviewDataFetched,
+          onSendPressed: _handleSendPressed,
+          showUserAvatars: true,
+          showUserNames: true,
+          user: _user,
+        ),
+      );
 }
