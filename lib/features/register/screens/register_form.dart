@@ -187,7 +187,8 @@ class _RegisterFormState extends State<RegisterForm> {
               DateTime.now(),
             'demandes': [],
             'amis' : [],
-            'token': token// Facultatif : stocker l'heure de création
+            'token': token,
+            'bloque':[]// Facultatif : stocker l'heure de création
           // Ajouter toute autre information que vous souhaitez stocker
         };
 
