@@ -1,8 +1,4 @@
 class FriendsRepository {
-  FriendsDataSource friendsDataSource;
-
-  FriendsRepository({required this.friendsDataSource});
-
   Stream<List<User>> getAllFriends() {
     return friendsDataSource.getAllFriends();
   }
